@@ -1,27 +1,33 @@
+/* Stile generale */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #ffffff; /* sfondo bianco */
     padding: 20px;
     color: #333;
     line-height: 1.6;
+    margin: 0;
 }
 
+/* Titoli centrati e colore primario */
 h1, h2 {
     color: #0a58ca;
     text-align: center;
 }
 
+/* Form centrato con larghezza massima */
 form {
     max-width: 600px;
     margin: 0 auto;
 }
 
+/* Etichette */
 label {
     font-weight: bold;
     margin-top: 15px;
     display: block;
 }
 
+/* Input e select */
 input, select, textarea {
     width: 100%;
     padding: 10px;
@@ -29,8 +35,10 @@ input, select, textarea {
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 
+/* Bottoni */
 button, a.button {
     display: inline-block;
     padding: 10px 20px;
@@ -41,18 +49,21 @@ button, a.button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    margin-top: 10px;
 }
 
 button:hover, a.button:hover {
     background: #0b5ed7;
 }
 
+/* Liste */
 ul, ol {
     max-width: 600px;
     margin: 0 auto 30px;
     text-align: left;
 }
 
+/* Immagine footer */
 footer img {
     width: 100%;
     max-width: 600px;
@@ -60,8 +71,31 @@ footer img {
     margin: 50px auto 0;
 }
 
+/* Immagine header (logo) */
 header img {
     display: block;
     margin: 0 auto;
-    width: 600px;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    form {
+        padding: 0 10px;
+    }
+
+    input, select, textarea, button {
+        font-size: 15px;
+    }
+
+    header img,
+    footer img {
+        width: 100%;
+        max-width: 100%;
+    }
 }

@@ -21,6 +21,14 @@
     </style>
 </head>
 <body>
+<header style="text-align: center; margin-bottom: 20px;">
+    <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
+    </a>
+    <div style="margin-top: 10px;">
+        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    </div>
+</header>
 
 <h1>Gestione Prezzi</h1>
 <form method="POST">

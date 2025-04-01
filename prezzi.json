@@ -1,8 +1,14 @@
 {
-"vetro_doppio": 250,
-"vetro_triplo": 300,
-"vetro_argon": 330,
-"maggiorazione_spessore_massima": 8,
-"spessore_base": 76,
-"spessore_massimo": 96
+    "vetro_doppio": 250.0,
+    "vetro_triplo": 300.0,
+    "vetro_argon": 320.0,
+    "cassonetto": 130.0,
+    "avvolgibile_mq": 35.0,
+    "rullo": 40.0,
+    "pellicolato_percentuale": 20.0,
+    "maggiorazione_spessore_massima": 8.0,
+    "spessore_base": 76.0,
+    "spessore_massimo": 96.0,
+    "maniglia_base": 20.0,
+    "maniglia_pro_percentuale": 5.0
 }

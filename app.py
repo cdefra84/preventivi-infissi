@@ -47,18 +47,62 @@ def pulisci_testo_pdf(testo):
         testo = testo.replace(k, v)
     return testo.encode("latin-1", "replace").decode("latin-1")
 
-def genera_pdf(cliente, articoli, filepath):
+from fpdf import FPDF
+
+def pulisci_testo_pdf(testo):
+    sostituzioni = {
+        "\u2018": "'",  # apostrofo sinistro
+        "\u2019": "'",  # apostrofo destro
+        "\u201c": '"',  # virgolette alte sinistra
+        "\u201d": '"',  # virgolette alte destra
+        "\u2026": "...",  # puntini di sospensione
+        "\u2013": "-",  # trattino medio
+        "\u2014": "-",  # trattino lungo
+        "’": "'",       # apostrofo Word
+    }
+    for k, v in sostituzioni.items():
+        testo = testo.replace(k, v)
+    return testo.encode("latin-1", "replace").decode("latin-1")
+
+def genera_numero_preventivo():
+    from datetime import datetime
+    anno = datetime.now().year
+    progressivo_file = "progressivo.json"
+
+    if os.path.exists(progressivo_file):
+        with open(progressivo_file, "r") as f:
+            dati = json.load(f)
+    else:
+        dati = {}
+
+    numero = dati.get(str(anno), 0) + 1
+    dati[str(anno)] = numero
+
+    with open(progressivo_file, "w") as f:
+        json.dump(dati, f)
+
+    return f"{numero:04d}_{anno}"  # es. 0002_2025
+
+
+def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     pdf = PDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
 
+    numero_preventivo = genera_numero_preventivo()
+
     # Logo in alto a sinistra
     logo_path = os.path.join("static", "immagini", "logo.jpg")
     if os.path.exists(logo_path):
-        pdf.image(logo_path, x=10, y=10, w=60)
+        pdf.image(logo_path, x=10, y=5, w=120)
+
+    # Numero preventivo sotto il logo
+    pdf.set_xy(10, 55)
+    pdf.set_font("Arial", "B", 12)
+    pdf.cell(0, 10, f"Preventivo : n. {numero_preventivo}", ln=True)
 
     # Intestazione cliente
-    pdf.set_xy(120, 15)
+    pdf.set_xy(110, 15)
     pdf.set_font("Arial", "", 12)
     pdf.cell(0, 10, pulisci_testo_pdf(f"{cliente['nome']} {cliente['cognome']}"), ln=True, align="R")
     pdf.cell(0, 10, pulisci_testo_pdf(cliente["indirizzo"]), ln=True, align="R")
@@ -111,7 +155,7 @@ def genera_pdf(cliente, articoli, filepath):
             "argon": "Triplo vetro con gas Argon"
         }.get(a["tipo_vetro"], "Vetro camera base")
 
-        pdf.set_font("Arial", "", 12)
+        pdf.set_font("Arial", "", 10)
         pdf.multi_cell(0, 10, pulisci_testo_pdf(descrizione))
         pdf.ln(1)
 
@@ -147,12 +191,12 @@ def genera_pdf(cliente, articoli, filepath):
     pdf.ln(5)
     pdf.cell(0, 10, f"Imponibile: {imponibile:.2f} EUR", ln=True)
     pdf.cell(0, 10, f"IVA 10%: {iva:.2f} EUR", ln=True)
-    pdf.set_font("Arial", "B", 12)
+    pdf.set_font("Arial", "B", 10)
     pdf.cell(0, 10, f"Totale: {totale_finale:.2f} EUR", ln=True)
 
     # Seconda pagina: Specifiche tecniche
     pdf.add_page()
-    pdf.set_font("Arial", "B", 12)
+    pdf.set_font("Arial", "B", 10)
     pdf.cell(0, 10, "Caratteristiche Tecniche del Sistema", ln=True)
     pdf.set_font("Arial", "", 11)
     pdf.multi_cell(0, 8, pulisci_testo_pdf(
@@ -176,11 +220,10 @@ def genera_pdf(cliente, articoli, filepath):
     # Aggiunta immagine pellicole
     img_pellicole = os.path.join("static", "immagini", "pellicole.jpg")
     if os.path.exists(img_pellicole):
-        pdf.image(img_pellicole, x=20, y=pdf.get_y()+10, w=160)
+        pdf.image(img_pellicole, x=20, y=pdf.get_y()+10, w=180)
 
     # Salvataggio PDF
     pdf.output(filepath)
-
 
 
 from PIL import Image
@@ -288,11 +331,13 @@ def conferma():
         articoli = json.load(f)
 
     if request.method == "POST":
-        filename = f"Preventivo_{rimuovi_caratteri_non_supportati(cliente['nome'])}_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+        numero_preventivo = genera_numero_preventivo()
+        filename = f"Preventivo_{numero_preventivo}.pdf"
         filepath = os.path.join("preventivi", filename)
         os.makedirs("preventivi", exist_ok=True)
+
         try:
-            genera_pdf(cliente, articoli, filepath)
+            genera_pdf(cliente, articoli, filepath, numero_preventivo)
 
             # ✅ Elimina i JSON temporanei
             os.remove(f"sessione/cliente_{session_id}.json")
@@ -304,9 +349,37 @@ def conferma():
 
     return render_template("conferma.html", cliente=cliente, articoli=articoli, success=False)
 
+
 @app.route("/download/<filename>")
 def download(filename):
     path = os.path.join("preventivi", filename)
     if os.path.exists(path):
         return send_file(path, as_attachment=True)
     return f"File {filename} non trovato", 404
+
+@app.route("/prezzi", methods=["GET", "POST"])
+def prezzi_view():
+    prezzi_file = "prezzi.json"
+
+    if request.method == "POST":
+        # Aggiorna i prezzi dal form
+        with open(prezzi_file, "r") as f:
+            prezzi = json.load(f)
+
+        for key in prezzi:
+            if key in request.form:
+                try:
+                    prezzi[key] = float(request.form[key].replace(",", "."))
+                except ValueError:
+                    pass  # ignora valori non validi
+
+        with open(prezzi_file, "w") as f:
+            json.dump(prezzi, f, indent=4)
+
+        return redirect("/prezzi")
+
+    # GET: carica i prezzi e mostra il form
+    with open(prezzi_file, "r") as f:
+        prezzi = json.load(f)
+
+    return render_template("prezzi.html", prezzi=prezzi)

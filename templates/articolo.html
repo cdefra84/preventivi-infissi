@@ -25,9 +25,15 @@
 </head>
 <body>
 
-<header>
-    <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
+<header style="text-align: center; margin-bottom: 20px;">
+    <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
+    </a>
+    <div style="margin-top: 10px;">
+        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    </div>
 </header>
+
 
 <div class="container">
     <h2>Inserisci Articolo {{ numero }}</h2>
@@ -123,45 +129,41 @@
         const effettoTesto = effetto.value.toLowerCase();
         const usaLegno = effettoTesto.includes("legno");
 
-        // Calcolo immagine da mostrare
         let nome = "";
-        if (n === "1") nome = usaLegno ? "finestra_legno_singola.jpg" : "finestra_bianca_singola.jpg";
-        else if (n === "2") nome = usaLegno ? "finestra_legno_doppia.jpg" : "finestra_bianca_doppia.jpg";
-        else if (n === "3") nome = usaLegno ? "finestra_legno_tripla.jpg" : "finestra_bianca_tripla.jpg";
+        if (n === "1") {
+            nome = usaLegno ? "finestra_singola_legno.jpg" : "finestra_bianca_singola.jpg";
+        } else if (n === "2") {
+            nome = usaLegno ? "finestra_doppia_legno.jpg" : "finestra_bianca_doppia.jpg";
+        } else if (n === "3") {
+            nome = usaLegno ? "finestra_legno_tripla.jpg" : "finestra_bianca_tripla.jpg";
+        }
 
         img.src = "/static/immagini/" + nome;
 
-        // Modifica dimensioni immagine
+        // Modifica dimensioni immagine in base alle proporzioni
         const larghezza = parseFloat(larghezzaInput.value);
         const altezza = parseFloat(altezzaInput.value);
 
         if (!isNaN(larghezza) && !isNaN(altezza)) {
             const rapporto = altezza / larghezza;
-            let base = 300;
 
             if (rapporto > 1.5) {
-                // Porta finestra: molto alta
                 img.style.width = "120px";
                 img.style.height = "300px";
             } else if (rapporto < 0.75) {
-                // Finestra orizzontale
                 img.style.width = "300px";
                 img.style.height = "120px";
             } else {
-                // Quadrata o standard
                 img.style.width = "250px";
                 img.style.height = "250px";
             }
         }
     }
 
-    // Event listeners
     ante.addEventListener("change", aggiornaImmagine);
     effetto.addEventListener("input", aggiornaImmagine);
     larghezzaInput.addEventListener("input", aggiornaImmagine);
     altezzaInput.addEventListener("input", aggiornaImmagine);
 </script>
-
-
 </body>
 </html>
