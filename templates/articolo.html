@@ -4,20 +4,35 @@
     <meta charset="UTF-8">
     <title>Articolo {{ numero }}</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        header img { display: block; margin: 0 auto; width: 200px; }
+        body { font-family: Arial; padding: 20px; background-color: #FFFFFF; }
+        header img { display: block; margin: 0 auto; width: 600px; }
+        .container { max-width: 700px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
         label { display: block; margin-top: 15px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; }
-        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+        .preview-image { display: block; margin: 20px auto; max-width: 300px; border-radius: 5px; border: 2px solid #ccc; }
+        .buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background-color: #2563eb; }
     </style>
 </head>
 <body>
-    <header>
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
-    </header>
 
+<header>
+    <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
+</header>
+
+<div class="container">
     <h2>Inserisci Articolo {{ numero }}</h2>
     <form method="POST">
+
         <label>Descrizione</label>
         <input name="descrizione" required>
 
@@ -32,10 +47,36 @@
 
         <label>Tipo di vetro</label>
         <select name="tipo_vetro">
-            <option value="doppio">Doppio vetro</option>
+            <option value="doppio">Vetro camera base</option>
             <option value="triplo">Triplo vetro</option>
             <option value="argon">Triplo vetro con gas Argon</option>
         </select>
+
+        <label>Tipo di serramento</label>
+        <select name="tipo_serramento" required>
+            <option value="PVC">PVC</option>
+            <option value="Legno">Legno</option>
+            <option value="Alluminio">Alluminio a taglio termico</option>
+            <option value="Legno-Alluminio">Legno + Alluminio</option>
+        </select>
+
+        <label>Numero di ante</label>
+        <select name="numero_ante" id="numero_ante" required>
+            <option value="1">1 anta</option>
+            <option value="2" selected>2 ante</option>
+            <option value="3">3 ante</option>
+        </select>
+
+        <label>Pellicolato?</label>
+        <select name="pellicolato" id="pellicolato">
+            <option value="n">No</option>
+            <option value="s">Sì</option>
+        </select>
+
+        <label>Effetto pellicolatura (se presente)</label>
+        <input name="effetto_pellicolato" id="effetto_pellicolato">
+
+        <img id="immagine_infisso" class="preview-image" src="{{ url_for('static', filename='immagini/finestra_bianca_doppia.jpg') }}" alt="Ante selezionate">
 
         <label>Cassonetti?</label>
         <select name="cassonetti">
@@ -55,23 +96,72 @@
             <option value="s">Sì</option>
         </select>
 
-        <label>Pellicolato?</label>
-        <select name="pellicolato">
-            <option value="n">No</option>
-            <option value="s">Sì</option>
-        </select>
-
-        <label>Effetto pellicolatura (se presente)</label>
-        <input name="effetto_pellicolato">
-
         <label>Accessori</label>
-        <input name="accessori">
+        <input name="accessori" value="Maniglia base">
 
         <label>Quantità</label>
-        <input name="quantita" type="number" required>
+        <input name="quantita" type="number" min="1" required>
 
         <input type="hidden" name="totale_articoli" value="{{ totale }}">
-        <button type="submit">Salva Articolo</button>
+
+        <div class="buttons">
+            <button type="submit" name="azione" value="continua">➕ Aggiungi un altro articolo</button>
+            <button type="submit" name="azione" value="fine">✅ Vai al preventivo</button>
+        </div>
     </form>
+</div>
+
+<script>
+    const img = document.getElementById("immagine_infisso");
+    const ante = document.getElementById("numero_ante");
+    const effetto = document.getElementById("effetto_pellicolato");
+    const larghezzaInput = document.querySelector("input[name='larghezza']");
+    const altezzaInput = document.querySelector("input[name='altezza']");
+
+    function aggiornaImmagine() {
+        const n = ante.value;
+        const effettoTesto = effetto.value.toLowerCase();
+        const usaLegno = effettoTesto.includes("legno");
+
+        // Calcolo immagine da mostrare
+        let nome = "";
+        if (n === "1") nome = usaLegno ? "finestra_legno_singola.jpg" : "finestra_bianca_singola.jpg";
+        else if (n === "2") nome = usaLegno ? "finestra_legno_doppia.jpg" : "finestra_bianca_doppia.jpg";
+        else if (n === "3") nome = usaLegno ? "finestra_legno_tripla.jpg" : "finestra_bianca_tripla.jpg";
+
+        img.src = "/static/immagini/" + nome;
+
+        // Modifica dimensioni immagine
+        const larghezza = parseFloat(larghezzaInput.value);
+        const altezza = parseFloat(altezzaInput.value);
+
+        if (!isNaN(larghezza) && !isNaN(altezza)) {
+            const rapporto = altezza / larghezza;
+            let base = 300;
+
+            if (rapporto > 1.5) {
+                // Porta finestra: molto alta
+                img.style.width = "120px";
+                img.style.height = "300px";
+            } else if (rapporto < 0.75) {
+                // Finestra orizzontale
+                img.style.width = "300px";
+                img.style.height = "120px";
+            } else {
+                // Quadrata o standard
+                img.style.width = "250px";
+                img.style.height = "250px";
+            }
+        }
+    }
+
+    // Event listeners
+    ante.addEventListener("change", aggiornaImmagine);
+    effetto.addEventListener("input", aggiornaImmagine);
+    larghezzaInput.addEventListener("input", aggiornaImmagine);
+    altezzaInput.addEventListener("input", aggiornaImmagine);
+</script>
+
+
 </body>
 </html>
