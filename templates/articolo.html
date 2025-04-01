@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Articolo {{ numero }}</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        header img { display: block; margin: 0 auto; width: 200px; }
+        label { display: block; margin-top: 15px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; }
+        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
+    </header>
+
+    <h2>Inserisci Articolo {{ numero }}</h2>
+    <form method="POST">
+        <label>Descrizione</label>
+        <input name="descrizione" required>
+
+        <label>Larghezza (mm)</label>
+        <input name="larghezza" type="number" step="0.01" required>
+
+        <label>Altezza (mm)</label>
+        <input name="altezza" type="number" step="0.01" required>
+
+        <label>Spessore infisso (da 76 a 96 mm)</label>
+        <input name="spessore" type="number" value="76" min="76" max="96" required>
+
+        <label>Tipo di vetro</label>
+        <select name="tipo_vetro">
+            <option value="doppio">Doppio vetro</option>
+            <option value="triplo">Triplo vetro</option>
+            <option value="argon">Triplo vetro con gas Argon</option>
+        </select>
+
+        <label>Cassonetti?</label>
+        <select name="cassonetti">
+            <option value="n">No</option>
+            <option value="s">Sì</option>
+        </select>
+
+        <label>Avvolgibili?</label>
+        <select name="avvolgibili">
+            <option value="n">No</option>
+            <option value="s">Sì</option>
+        </select>
+
+        <label>Rullo Puleggia?</label>
+        <select name="rullo">
+            <option value="n">No</option>
+            <option value="s">Sì</option>
+        </select>
+
+        <label>Pellicolato?</label>
+        <select name="pellicolato">
+            <option value="n">No</option>
+            <option value="s">Sì</option>
+        </select>
+
+        <label>Effetto pellicolatura (se presente)</label>
+        <input name="effetto_pellicolato">
+
+        <label>Accessori</label>
+        <input name="accessori">
+
+        <label>Quantità</label>
+        <input name="quantita" type="number" required>
+
+        <input type="hidden" name="totale_articoli" value="{{ totale }}">
+        <button type="submit">Salva Articolo</button>
+    </form>
+</body>
+</html>

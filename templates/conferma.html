@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Conferma Preventivo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
+    <style>
+        header img { display: block; margin: 0 auto; width: 200px; }
+        footer img { width: 100%; max-width: 600px; display: block; margin: 50px auto 0; }
+        button, a.button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
+    </header>
+
+    {% if success %}
+        <h1>✅ Preventivo inviato con successo!</h1>
+        <p>Puoi scaricarlo cliccando qui:</p>
+        <a class="button" href="{{ url_for('download', filename=file) }}" download>📄 Scarica il tuo preventivo</a>
+    {% else %}
+        <h1>Conferma i tuoi dati</h1>
+
+        <h2>Dati Cliente</h2>
+        <ul>
+            <li><strong>Nome:</strong> {{ cliente.nome }}</li>
+            <li><strong>Cognome:</strong> {{ cliente.cognome }}</li>
+            <li><strong>Email:</strong> {{ cliente.email }}</li>
+            <li><strong>Indirizzo:</strong> {{ cliente.indirizzo }}</li>
+            <li><strong>Data:</strong> {{ cliente.data }}</li>
+        </ul>
+
+        <h2>Articoli inseriti</h2>
+        <ol>
+            {% for articolo in articoli %}
+                <li>
+                    <strong>{{ articolo.descrizione }}</strong><br>
+                    Dimensioni: {{ articolo.larghezza }} x {{ articolo.altezza }} mm<br>
+                    Quantità: {{ articolo.quantita }}<br>
+                    Spessore: {{ articolo.spessore }} mm<br>
+                    Tipo vetro: 
+                    {% if articolo.tipo_vetro == 'doppio' %}Doppio vetro{% elif articolo.tipo_vetro == 'triplo' %}Triplo vetro{% else %}Triplo vetro con gas Argon{% endif %}<br>
+                    {% if articolo.cassonetti == 's' %}✔ Cassonetti<br>{% endif %}
+                    {% if articolo.avvolgibili == 's' %}✔ Avvolgibili<br>{% endif %}
+                    {% if articolo.rullo == 's' %}✔ Rullo calotta<br>{% endif %}
+                    {% if articolo.pellicolato == 's' %}✔ Pellicolato: {{ articolo.effetto_pellicolato }}<br>{% endif %}
+                    {% if articolo.accessori %}✔ Accessori: {{ articolo.accessori }}<br>{% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+
+        <form method="POST">
+            <button type="submit">✅ Genera e invia il preventivo</button>
+        </form>
+    {% endif %}
+
+    <footer>
+        <img src="{{ url_for('static', filename='immagini/pellicole.jpg') }}" alt="Guida pellicole">
+    </footer>
+
+</body>
+</html>
