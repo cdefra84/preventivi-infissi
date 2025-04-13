@@ -494,43 +494,44 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     filepath = os.path.join("preventivi", f"preventivo_{numero_preventivo}.pdf")
     pdf.output(filepath)
 
-    invia_email(cliente["email"], filepath)
+    invia_email(cliente["email"], filepath, numero_preventivo)
 
 import smtplib, ssl
 from email.message import EmailMessage
 import os
 
-def invia_email(cliente_email, allegato_path):
+def invia_email(cliente_email, allegato_path, numero_preventivo):
     msg = EmailMessage()
-    msg["Subject"] = "Invio Preventivo Infissi"
-    msg["From"] = "falegnameriaamerico@tiscali.it"
+    msg["Subject"] = f"Preventivo infissi n. {numero_preventivo}"
+    msg["From"] = "noreply@bit4k.com"
     msg["To"] = cliente_email
     msg["Cc"] = "falegnameriaamerico@tiscali.it"
     msg.set_content("""\
-        Gentile Cliente,
+Gentile Cliente,
 
-        in allegato trova il preventivo dettagliato relativo alla sua richiesta di infissi.  
-        Per qualsiasi chiarimento o modifica, non esiti a contattarci: siamo a sua completa disposizione.
+in allegato trova il preventivo dettagliato relativo alla sua richiesta di infissi.  
 
-        Cordiali saluti,
+❗ Si prega di **non rispondere a questa email (noreply@bit4k.com)**.  
+Per qualsiasi chiarimento o modifica, la invitiamo a contattarci telefonicamente o tramite la mail indicata qui sotto.
 
-        INFISSI MOBILIFICIO E FALEGNAMERIA MICHELE AMERICO  
-        SHOWROOM ROCCHETTA SANT'ANTONIO – Cell. 333.4352383  
-        SHOWROOM MONTEFALCIONE (AV) – Cell. 389.9686594  
-        Email: falegnameriaamerico@tiscali.it
-        """)
+Cordiali saluti,
+
+INFISSI MOBILIFICIO E FALEGNAMERIA MICHELE AMERICO  
+SHOWROOM ROCCHETTA SANT'ANTONIO – Cell. 333.4352383  
+SHOWROOM MONTEFALCIONE (AV) – Cell. 389.9686594  
+Email: falegnameriaamerico@tiscali.it
+""")
 
     with open(allegato_path, "rb") as f:
         file_data = f.read()
         file_name = os.path.basename(allegato_path)
         msg.add_attachment(file_data, maintype="application", subtype="pdf", filename=file_name)
 
-    # Contesto SSL limitato a TLSv1.2 (compatibile con Tiscali)
-    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    context.set_ciphers('DEFAULT@SECLEVEL=1')
+    # Connessione con SSL Aruba
+    context = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL("smtp.tiscali.it", 465, context=context) as smtp:
-        smtp.login("falegnameriaamerico@tiscali.it", "Michele1975")
+    with smtplib.SMTP_SSL("smtps.aruba.it", 465, context=context) as smtp:
+        smtp.login("noreply@bit4k.com", "Michele1975!")
         smtp.send_message(msg)
 
 from PIL import Image, ImageDraw, ImageFont
