@@ -406,7 +406,7 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         "Tutti i lavori saranno eseguiti da posatore installatore certificato senior (EQF3)."
     ))
 
-    pdf.ln(10)
+    pdf.ln(15)
 
     # Firma e intestazione finale
     firma_path = os.path.join("static", "immagini", "firma.png")
@@ -418,17 +418,17 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
 
     # Coordinate per l'immagine della firma
     x_firma = pdf.w - 55  # posizione più a destra
-    y_firma = pdf.get_y()
+    y_firma = pdf.get_y() + 5
 
     # Inserisci l'immagine della firma
     if os.path.exists(firma_path):
         pdf.image(firma_path, x=x_firma, y=y_firma, w=40)
 
     # Sposta testo 10 mm più verso il centro
-    x_testo = x_firma - 10
+    x_testo = x_firma - 15
 
     # Scritta "FIRMA"
-    pdf.set_xy(x_testo, y_firma + 10)
+    pdf.set_xy(x_testo, y_firma + 15)
     pdf.set_font("Arial", "B", 7)
     pdf.cell(0, 5, "FIRMA", ln=True, align="R")
 

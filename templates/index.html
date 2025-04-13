@@ -68,22 +68,25 @@
 </head>
 <body>
 <div class="form-container">
-<header style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
-    <!-- Logo a sinistra -->
-    <div>
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="height: 50%;">
+  <header style="text-align: center; padding: 20px;">
+
+    <!-- Titolo principale -->
+    <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">
+      INFISSI MOBILIFICIO E FALEGNAMERIA
     </div>
 
-    <!-- Testo a destra -->
-    <div style="flex: 1; font-size: 18px; font-weight: bold; line-height: 1.6; text-align: left; padding-left: 30px;">
-        INFISSI MOBILIFICIO E FALEGNAMERIA<br>
-        <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO<br>
-Cell. 333.4352383</span><br>
-        <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>
-Cell. 389.9686594</span> 
-		    </div>
-</header>
+    <!-- Logo centrato e più grande -->
+    <div style="margin-bottom: 15px;">
+      <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
+    </div>
 
+    <!-- Testo showroom e contatti -->
+    <div style="font-size: 17px; font-weight: bold; line-height: 1.6;">
+      <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO (FG)<br>Cell. 333.4352383</span><br>
+      <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span>
+    </div>
+
+  </header>
 
         <h2>Compila i dati per calcolare il preventivo</h2>
         	<form method="POST">

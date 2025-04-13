@@ -5,101 +5,145 @@
     <title>Conferma Preventivo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            margin: 0;
-            background-color: #FFFFFF;
-        }
-		header img {
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        margin: 0;
+        background-color: #FFFFFF;
+    }
+
+    header {
+        text-align: center;
+        padding: 20px;
+    }
+
+    header .titolo {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    header img {
             display: block;
             margin: 0 auto;
-            max-width: 800px;
-            height: auto;
         }
-        button, a.button {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            cursor: pointer;
+
+    header .info {
+        font-size: 17px;
+        font-weight: bold;
+        line-height: 1.6;
+    }
+
+    h1, h2 {
+        text-align: center;
+        font-size: 28px;
+        margin-top: 20px;
+    }
+
+    ul, ol {
+        max-width: 900px;
+        margin: 20px auto;
+        background: #FFFFFF;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+    }
+
+    li {
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+
+    button, a.button {
+        display: inline-block;
+        width: 100%;
+        max-width: 320px;
+        margin: 10px auto;
+        padding: 14px 24px;
+        font-size: 18px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: background 0.3s;
+    }
+
+    button:hover, a.button:hover {
+        background: #005dc1;
+    }
+
+    .center-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    @media (max-width: 600px) {
+        body {
+            padding: 15px;
         }
 
         h1, h2 {
-            text-align: center;
+            font-size: 22px;
         }
 
         ul, ol {
-            max-width: 900px;
-            margin: 20px auto;
-            background: #FFFFFF;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+            padding: 15px;
         }
 
-        li {
-            margin-bottom: 15px;
-            line-height: 1.6;
+        button, a.button {
+            font-size: 16px;
+            padding: 12px 20px;
         }
-
-        .center-btn {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-        }
-
-        @media (max-width: 600px) {
-            button, a.button {
-                width: 100%;
-                text-align: center;
-            }
-
-            ul, ol {
-                padding: 15px;
-            }
-        }
+    }
     </style>
 </head>
 <body>
-<header style="display: flex; align-items: center; justify-content: center; gap: 40px; padding: 20px;">
-    <!-- Logo -->
-    <div>
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="height: 50%;">
+
+<div class="form-container">
+  <header style="text-align: center; padding: 20px;">
+
+    <!-- Titolo principale -->
+    <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">
+      INFISSI MOBILIFICIO E FALEGNAMERIA
     </div>
 
-    <!-- Testo a destra del logo -->
-    <div style="font-size: 18px; font-weight: bold; line-height: 1.6; text-align: left;">
-        INFISSI MOBILIFICIO E FALEGNAMERIA<br>
-        <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO<br>Cell. 333.4352383</span><br>
-        <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span> 
+    <!-- Logo centrato e più grande -->
+    <div style="margin-bottom: 15px;">
+      <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
     </div>
-</header>
+
+    <!-- Testo showroom e contatti -->
+    <div style="font-size: 17px; font-weight: bold; line-height: 1.6;">
+      <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO (FG)<br>Cell. 333.4352383</span><br>
+      <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span>
+    </div>
+
+  </header>
     <div style="margin-top: 10px;text-align: center">
         <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
     </div>
 
-
 {% if success %}
-<h1>✅ Preventivo inviato con successo!</h1>
-<p style="text-align: center;">Puoi scaricarlo cliccando qui:</p>
+    <h1>✅ Preventivo inviato con successo!</h1>
+    <p style="text-align: center;">Puoi scaricarlo cliccando qui:</p>
 
-<div class="center-btn" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
-    <!-- Pulsante download -->
-    <a class="button" href="{{ url_for('download', filename=file) }}" download>
-        📄 Scarica il tuo preventivo
-    </a>
-
-    <!-- Pulsante email -->
-    <a href="mailto:falegnameriaamerico@tiscali.it"
-       style="display: inline-block; padding: 10px 20px; background-color: #00A021; color: white; text-decoration: none; border-radius: 6px; font-size: 16px;">
-       ✉️ Contattaci via Email
-    </a>
-</div>
+    <div class="center-btn">
+        <a class="button" href="{{ url_for('download', filename=file) }}" download>
+            📄 Scarica il tuo preventivo
+        </a>
+        <a href="mailto:falegnameriaamerico@tiscali.it"
+           style="background-color: #00A021;"
+           class="button">
+           ✉️ Contattaci via Email
+        </a>
+    </div>
 
 {% else %}
     <h1>Conferma i tuoi dati</h1>
@@ -120,7 +164,6 @@
     <ol style="list-style: none; padding: 0;">
     {% for articolo in articoli %}
         <li style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
-            
             <div style="flex: 1;">
                 <strong>{{ articolo.descrizione | upper }}</strong><br>
                 Dimensioni: {{ articolo.larghezza }} x {{ articolo.altezza }} mm<br>
@@ -132,7 +175,6 @@
                 {% if articolo.tipo_vetro == 'doppio' %}Vetro camera base
                 {% elif articolo.tipo_vetro == 'triplo' %}Triplo vetro
                 {% else %}Triplo vetro con gas Argon{% endif %}<br>
-
                 Cassonetti: {{ '✔ Sì' if articolo.cassonetti == 's' else 'No' }}<br>
                 Avvolgibili: {{ '✔ Sì' if articolo.avvolgibili == 's' else 'No' }}<br>
                 Rullo calotta: {{ '✔ Sì' if articolo.rullo == 's' else 'No' }}<br>
@@ -141,18 +183,16 @@
             </div>
 
             {% if articolo.immagine %}
-    <div style="flex-shrink: 0;">
-        <img src="/{{ articolo.immagine }}"
-             alt="Immagine infisso"
-             style="max-width: 150px; max-height: 150px; width: 100px; border: 1px solid #ccc; border-radius: 5px; margin-right: 50;">
-    </div>
-{% endif %}
-
+            <div style="flex-shrink: 0;">
+                <img src="/{{ articolo.immagine }}" alt="Immagine infisso"
+                     style="max-width: 150px; max-height: 150px; width: 100px; border: 1px solid #ccc; border-radius: 5px;">
+            </div>
+            {% endif %}
         </li>
     {% endfor %}
-</ol>
-<br>
-{% if sconto_valore and sconto_valore > 0 %}
+    </ol>
+
+    {% if sconto_valore and sconto_valore > 0 %}
     <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
         <p style="color: #000000; font-weight: bold; font-size: 22px;">
             ✅ Hai uno <span style="font-size: 26px;">sconto del {{ sconto_percentuale }}%</span><br>
@@ -161,20 +201,19 @@
             </span>
         </p>
     </div>
-{% endif %}
-<div class="center-btn">
-    <a class="button" href="{{ url_for('modifica_articoli', session=session_id) }}">🔄 Modifica i serramenti</a>
-</div>
     {% endif %}
 
     <div class="center-btn">
-    <form method="POST">
-        <button type="submit">✅ Genera e invia il preventivo</button>
-    </form>
-</div>
+        <a class="button" href="{{ url_for('modifica_articoli', session=session_id) }}">🔄 Modifica i serramenti</a>
+    </div>
+    {% endif %}
 
+    <div class="center-btn">
+        <form method="POST">
+            <button type="submit">✅ Genera e invia il preventivo</button>
+        </form>
+    </div>
 {% endif %}
 
-</div> 
 </body>
 </html>

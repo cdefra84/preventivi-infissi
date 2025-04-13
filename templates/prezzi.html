@@ -1,102 +1,158 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <title>Gestione Prezzi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
-    <style>
-        form { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input { width: 100%; padding: 10px; margin-top: 5px; }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background: #198754;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button:hover { background: #157347; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Gestione Prezzi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
+  <style>
+    /* Stili generali */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #FFFFFF;
+    }
+
+    /* Contenitore centrato per il form */
+    .form-container {
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Stili per il form */
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-top: 5px;
+    }
+
+    /* Pulsante "Salva Prezzi" */
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 18px;
+      background: #198754;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #157347;
+    }
+
+    /* Responsive: schermi piccoli */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .form-container {
+        padding: 15px;
+      }
+      input, button {
+        font-size: 16px;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
-<header style="text-align: center; margin-bottom: 20px;">
+  <header style="text-align: center; margin-bottom: 20px;">
     <a href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
+      <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
     </a>
-    <div style="margin-top: 10px;">
-        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    <div style="margin-top: 10px; text-align: center;">
+      <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
     </div>
-</header>
+  </header>
 
-<h1>Gestione Prezzi</h1>
-<form method="POST">
-    <label>Vetro camera base</label>
-    <input type="number" step="0.01" name="vetro_doppio" value="{{ prezzi.vetro_doppio }}">
+  <div class="form-container">
+    <h1>Gestione Prezzi</h1>
+    <form method="POST">
+      <label>Vetro camera base</label>
+      <input type="number" step="0.01" name="vetro_doppio" value="{{ prezzi.vetro_doppio }}">
 
-    <label>Triplo vetro</label>
-    <input type="number" step="0.01" name="vetro_triplo" value="{{ prezzi.vetro_triplo }}">
+      <label>Triplo vetro</label>
+      <input type="number" step="0.01" name="vetro_triplo" value="{{ prezzi.vetro_triplo }}">
 
-    <label>Triplo vetro con gas Argon</label>
-    <input type="number" step="0.01" name="vetro_argon" value="{{ prezzi.vetro_argon }}">
+      <label>Triplo vetro con gas Argon</label>
+      <input type="number" step="0.01" name="vetro_argon" value="{{ prezzi.vetro_argon }}">
 
-    <label>Costo cassonetto</label>
-    <input type="number" step="0.01" name="cassonetto" value="{{ prezzi.cassonetto }}">
+      <label>Costo cassonetto</label>
+      <input type="number" step="0.01" name="cassonetto" value="{{ prezzi.cassonetto }}">
 
-    <label>Prezzo avvolgibile al mq</label>
-    <input type="number" step="0.01" name="avvolgibile_mq" value="{{ prezzi.avvolgibile_mq }}">
+      <label>Prezzo avvolgibile al mq</label>
+      <input type="number" step="0.01" name="avvolgibile_mq" value="{{ prezzi.avvolgibile_mq }}">
 
-    <label>Costo rullo calotta</label>
-    <input type="number" step="0.01" name="rullo" value="{{ prezzi.rullo }}">
+      <label>Costo rullo calotta</label>
+      <input type="number" step="0.01" name="rullo" value="{{ prezzi.rullo }}">
 
-    <label>% maggiorazione pellicolato</label>
-    <input type="number" step="0.01" name="pellicolato_percentuale" value="{{ prezzi.pellicolato_percentuale }}">
+      <label>% maggiorazione pellicolato</label>
+      <input type="number" step="0.01" name="pellicolato_percentuale" value="{{ prezzi.pellicolato_percentuale }}">
 
-    <label>% maggiorazione spessore max</label>
-    <input type="number" step="0.01" name="maggiorazione_spessore_massima" value="{{ prezzi.maggiorazione_spessore_massima }}">
+      <label>% maggiorazione spessore max</label>
+      <input type="number" step="0.01" name="maggiorazione_spessore_massima" value="{{ prezzi.maggiorazione_spessore_massima }}">
 
-    <label>Spessore base</label>
-    <input type="number" step="1" name="spessore_base" value="{{ prezzi.spessore_base }}">
+      <label>Spessore base</label>
+      <input type="number" step="1" name="spessore_base" value="{{ prezzi.spessore_base }}">
 
-    <label>Spessore massimo</label>
-    <input type="number" step="1" name="spessore_massimo" value="{{ prezzi.spessore_massimo }}">
+      <label>Spessore massimo</label>
+      <input type="number" step="1" name="spessore_massimo" value="{{ prezzi.spessore_massimo }}">
 
-    <label>Costo maniglia base (€)</label>
-    <input type="number" step="0.01" name="maniglia_base" value="{{ prezzi.maniglia_base or 20 }}">
+      <label>Costo maniglia base (€)</label>
+      <input type="number" step="0.01" name="maniglia_base" value="{{ prezzi.maniglia_base or 20 }}">
 
-    <label>% maniglia PRO (in percentuale sul totale)</label>
-    <input type="number" step="0.01" name="maniglia_pro_percentuale" value="{{ prezzi.maniglia_pro_percentuale or 5 }}">
-	
-	<h2>Sconti su volume</h2>
+      <label>% maniglia PRO (in percentuale sul totale)</label>
+      <input type="number" step="0.01" name="maniglia_pro_percentuale" value="{{ prezzi.maniglia_pro_percentuale or 5 }}">
 
-	<label>Sconto 5–10 pezzi (%)</label>
-	<input type="number" step="0.01" name="sconto_5_10_pezzi" value="{{ prezzi.sconto_5_10_pezzi or 0 }}">
+      <h2>Sconti su volume</h2>
 
-	<label>Sconto 11–20 pezzi (%)</label>
-	<input type="number" step="0.01" name="sconto_11_20_pezzi" value="{{ prezzi.sconto_11_20_pezzi or 0 }}">
+      <label>Sconto 5–10 pezzi (%)</label>
+      <input type="number" step="0.01" name="sconto_5_10_pezzi" value="{{ prezzi.sconto_5_10_pezzi or 0 }}">
 
-	<label>Sconto oltre 50 pezzi (%)</label>
-	<input type="number" step="0.01" name="sconto_oltre_50_pezzi" value="{{ prezzi.sconto_oltre_50_pezzi or 0 }}">
+      <label>Sconto 11–20 pezzi (%)</label>
+      <input type="number" step="0.01" name="sconto_11_20_pezzi" value="{{ prezzi.sconto_11_20_pezzi or 0 }}">
 
-	<label>Sconto 5.000–10.000 € (%)</label>
-	<input type="number" step="0.01" name="sconto_5000_10000" value="{{ prezzi.sconto_5000_10000 or 0 }}">
+      <label>Sconto oltre 50 pezzi (%)</label>
+      <input type="number" step="0.01" name="sconto_oltre_50_pezzi" value="{{ prezzi.sconto_oltre_50_pezzi or 0 }}">
 
-	<label>Sconto 10.000–50.000 € (%)</label>
-	<input type="number" step="0.01" name="sconto_10000_50000" value="{{ prezzi.sconto_10000_50000 or 0 }}">
+      <label>Sconto 5.000–10.000 € (%)</label>
+      <input type="number" step="0.01" name="sconto_5000_10000" value="{{ prezzi.sconto_5000_10000 or 0 }}">
 
-	<label>Sconto oltre 50.000 € (%)</label>
-	<input type="number" step="0.01" name="sconto_oltre_50000" value="{{ prezzi.sconto_oltre_50000 or 0 }}">
-	
-	<label>Costo giornaliero della manodopera (€)</label>
-	<input type="number" step="0.01" name="costo_giornata" value="{{ prezzi.costo_giornata or 150 }}">
+      <label>Sconto 10.000–50.000 € (%)</label>
+      <input type="number" step="0.01" name="sconto_10000_50000" value="{{ prezzi.sconto_10000_50000 or 0 }}">
 
-	<label>Costo viaggio per km (€)</label>
-	<input type="number" step="0.01" name="costo_km" value="{{ prezzi.costo_km or 0.5 }}">
+      <label>Sconto oltre 50.000 € (%)</label>
+      <input type="number" step="0.01" name="sconto_oltre_50000" value="{{ prezzi.sconto_oltre_50000 or 0 }}">
 
+      <label>Costo giornaliero della manodopera (€)</label>
+      <input type="number" step="0.01" name="costo_giornata" value="{{ prezzi.costo_giornata or 150 }}">
 
-    <button type="submit">💾 Salva Prezzi</button>
-</form>
+      <label>Costo viaggio per km (€)</label>
+      <input type="number" step="0.01" name="costo_km" value="{{ prezzi.costo_km or 0.5 }}">
 
+      <button type="submit">💾 Salva Prezzi</button>
+    </form>
+  </div>
 </body>
 </html>
