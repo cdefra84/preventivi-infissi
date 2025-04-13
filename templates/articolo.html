@@ -2,17 +2,60 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Articolo {{ numero }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serramento {{ numero }}</title>
     <style>
-        body { font-family: Arial; padding: 20px; background-color: #FFFFFF; }
-        header img { display: block; margin: 0 auto; width: 600px; }
-        .container { max-width: 700px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
-        .preview-image { display: block; margin: 20px auto; max-width: 300px; border-radius: 5px; border: 2px solid #ccc; }
-        .buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #FFFFFF;
+            margin: 0;
+        }
+
+        header img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .preview-image {
+            display: block;
+            margin: 20px auto;
+            border-radius: 5px;
+          }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
         button {
-            padding: 10px 20px;
+            padding: 12px;
             font-size: 16px;
             background-color: #3b82f6;
             color: white;
@@ -20,103 +63,195 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover { background-color: #2563eb; }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        footer img {
+            width: 100%;
+            max-width: 1000px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        @media (min-width: 600px) {
+            .buttons {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .preview-image {
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
+<div class="container">
+<header style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+    <!-- Logo -->
+    <div>
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="height: 50%;">
+    </div>
 
-<header style="text-align: center; margin-bottom: 20px;">
-    <a href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
-    </a>
-    <div style="margin-top: 10px;">
-        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    <!-- Testo a destra del logo -->
+    <div style="font-size: 18px; font-weight: bold; line-height: 1.6; text-align: left;">
+        INFISSI MOBILIFICIO E FALEGNAMERIA<br>
+        <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO<br>Cell. 333.4352383</span><br>
+        <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span> 
     </div>
 </header>
+    <div style="margin-top: 10px;text-align: center">
+        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    </div>
 
 
-<div class="container">
-    <h2>Inserisci Articolo {{ numero }}</h2>
+
+
+    {# 🔁 Mostra il riepilogo solo se ci sono articoli inseriti #}
+    {% if articoli %}
+        <h3>Riepilogo serramenti già inseriti</h3>
+        <ul style="list-style: none; padding-left: 0;">
+            {% for a in articoli %}
+                <li style="margin-bottom: 10px; background: #f8f8f8; padding: 10px; border-radius: 5px;">
+                    <strong>{{ a.descrizione }}</strong> – {{ a.larghezza }}x{{ a.altezza }} mm – {{ a.quantita }} pezzi
+                    <a href="{{ url_for('articolo', n=loop.index, session=session_id, modifica=1) }}"
+                       style="margin-left: 10px; text-decoration: none; color: #007bff;">✏️ Modifica</a>
+                </li>
+            {% endfor %}
+        </ul>
+        <br>
+    {% endif %}
+
+    {# ✅ FORM SEMPRE VISIBILE #}
+    <h2>Inserisci il serramento numero {{ numero }}</h2>
     <form method="POST">
 
-        <label>Descrizione</label>
-        <input name="descrizione" required>
+        <label for="descrizione">Descrizione</label>
+        <input type="text" name="descrizione" id="descrizione" class="form-control"
+               placeholder="Es. Finestra bagno"
+               value="{{ (articolo.descrizione if articolo.descrizione is defined else '') | e }}">
 
         <label>Larghezza (mm)</label>
-        <input name="larghezza" type="number" step="0.01" required>
+        <input name="larghezza" type="number" step="1" required
+               value="{{ (articolo.larghezza if articolo.larghezza is defined else '') | e }}">
 
         <label>Altezza (mm)</label>
-        <input name="altezza" type="number" step="0.01" required>
+        <input name="altezza" type="number" step="1" required
+               value="{{ (articolo.altezza if articolo.altezza is defined else '') | e }}">
 
         <label>Spessore infisso (da 76 a 96 mm)</label>
-        <input name="spessore" type="number" value="76" min="76" max="96" required>
+        <input name="spessore" type="number" min="76" max="96" required
+               value="{{ (articolo.spessore if articolo.spessore is defined else 76) | e }}">
 
         <label>Tipo di vetro</label>
         <select name="tipo_vetro">
-            <option value="doppio">Vetro camera base</option>
-            <option value="triplo">Triplo vetro</option>
-            <option value="argon">Triplo vetro con gas Argon</option>
+            <option value="doppio" {% if articolo.tipo_vetro == 'doppio' %}selected{% endif %}>Vetro camera base</option>
+            <option value="triplo" {% if articolo.tipo_vetro == 'triplo' %}selected{% endif %}>Triplo vetro</option>
+            <option value="argon" {% if articolo.tipo_vetro == 'argon' %}selected{% endif %}>Triplo vetro con Gas Argon</option>
         </select>
 
         <label>Tipo di serramento</label>
         <select name="tipo_serramento" required>
-            <option value="PVC">PVC</option>
-            <option value="Legno">Legno</option>
-            <option value="Alluminio">Alluminio a taglio termico</option>
-            <option value="Legno-Alluminio">Legno + Alluminio</option>
+            <option value="PVC" {% if articolo.tipo_serramento == 'PVC' %}selected{% endif %}>PVC</option>
+            <option value="Legno" {% if articolo.tipo_serramento == 'Legno' %}selected{% endif %}>Legno</option>
+            <option value="Alluminio" {% if articolo.tipo_serramento == 'Alluminio' %}selected{% endif %}>Alluminio a taglio termico</option>
+            <option value="Legno-Alluminio" {% if articolo.tipo_serramento == 'Legno-Alluminio' %}selected{% endif %}>Legno + Alluminio</option>
         </select>
 
         <label>Numero di ante</label>
         <select name="numero_ante" id="numero_ante" required>
-            <option value="1">1 anta</option>
-            <option value="2" selected>2 ante</option>
-            <option value="3">3 ante</option>
+            <option value="1" {% if articolo.numero_ante == '1' %}selected{% endif %}>1 anta</option>
+            <option value="2" {% if articolo.numero_ante == '2' %}selected{% endif %}>2 ante</option>
+            <option value="3" {% if articolo.numero_ante == '3' %}selected{% endif %}>3 ante</option>
         </select>
 
         <label>Pellicolato?</label>
         <select name="pellicolato" id="pellicolato">
-            <option value="n">No</option>
-            <option value="s">Sì</option>
+            <option value="n" {% if articolo.pellicolato == 'n' %}selected{% endif %}>No</option>
+            <option value="s" {% if articolo.pellicolato == 's' %}selected{% endif %}>Sì</option>
         </select>
 
-        <label>Effetto pellicolatura (se presente)</label>
-        <input name="effetto_pellicolato" id="effetto_pellicolato">
+        <label for="effetto_pellicolato">Effetto pellicolatura (se presente)</label>
+        <input name="effetto_pellicolato" id="effetto_pellicolato" class="form-control"
+               value="{{ (articolo.effetto_pellicolato if articolo.effetto_pellicolato is defined else '') | e }}"
+               placeholder="Es. RAL 7016 esterno, Bianco massa interno">
 
-        <img id="immagine_infisso" class="preview-image" src="{{ url_for('static', filename='immagini/finestra_bianca_doppia.jpg') }}" alt="Ante selezionate">
+        <a href="#" onclick="window.open('{{ url_for('static', filename='immagini/pellicole_colori.jpg') }}', 'pellicole', 'width=800,height=600'); return false;">
+            🎨 Vedi la tabella colori pellicole
+        </a>
 
-        <label>Cassonetti?</label>
+        <img id="immagine_infisso" class="preview-image" src="{{ url_for('static', filename='immagini/finestra_doppia_bianca.jpg') }}" alt="Ante selezionate">
+
+        <label>Cassonetti tapparelle?</label>
         <select name="cassonetti">
-            <option value="n">No</option>
-            <option value="s">Sì</option>
+            <option value="n" {% if articolo.cassonetti == 'n' %}selected{% endif %}>No</option>
+            <option value="s" {% if articolo.cassonetti == 's' %}selected{% endif %}>Sì</option>
         </select>
 
-        <label>Avvolgibili?</label>
+        <label>Avvolgibili? (Oscuranti)</label>
         <select name="avvolgibili">
-            <option value="n">No</option>
-            <option value="s">Sì</option>
+            <option value="n" {% if articolo.avvolgibili == 'n' %}selected{% endif %}>No</option>
+            <option value="s" {% if articolo.avvolgibili == 's' %}selected{% endif %}>Sì</option>
         </select>
 
-        <label>Rullo Puleggia?</label>
+        <label>Rullo Puleggia? (Cintino)</label>
         <select name="rullo">
-            <option value="n">No</option>
-            <option value="s">Sì</option>
+            <option value="n" {% if articolo.rullo == 'n' %}selected{% endif %}>No</option>
+            <option value="s" {% if articolo.rullo == 's' %}selected{% endif %}>Sì</option>
         </select>
 
-        <label>Accessori</label>
-        <input name="accessori" value="Maniglia base">
+        <label>Vasistas (Ribaltabile)?</label>
+        <select name="vasistas">
+            <option value="n" {% if articolo.vasistas == 'n' %}selected{% endif %}>No</option>
+            <option value="s" {% if articolo.vasistas == 's' %}selected{% endif %}>Sì</option>
+        </select>
+
+        <label for="accessori">Accessori (inserisci il tipo maniglia e il colore)</label>
+        <input name="accessori" id="accessori" class="form-control"
+               value="{{ (articolo.accessori if articolo.accessori is defined else '') | e }}"
+               placeholder="Es. Maniglia base titanio, Maniglia PRO satinata">
+
+        <p>
+            <a href="#" onclick="window.open('{{ url_for('static', filename='immagini/Maniglie_colori.jpg') }}', 'maniglie_pro', 'width=800,height=600,scrollbars=yes'); return false;">
+                Vedi i tipi di maniglia PRO
+            </a><br>
+            <a href="#" onclick="window.open('{{ url_for('static', filename='immagini/Maniglie_colori1.jpeg') }}', 'colori_maniglie', 'width=800,height=600,scrollbars=yes'); return false;">
+                Vedi i colori delle maniglie
+            </a>
+        </p>
 
         <label>Quantità</label>
-        <input name="quantita" type="number" min="1" required>
+        <input name="quantita" type="number" min="1" required
+               value="{{ (articolo.quantita if articolo.quantita is defined else 1) | e }}">
 
         <input type="hidden" name="totale_articoli" value="{{ totale }}">
 
         <div class="buttons">
-            <button type="submit" name="azione" value="continua">➕ Aggiungi un altro articolo</button>
+            <button type="submit" name="azione" value="continua">➕ Aggiungi un altro serramento</button>
             <button type="submit" name="azione" value="fine">✅ Vai al preventivo</button>
         </div>
     </form>
+
 </div>
 
+
+<footer>
+        <a href="{{ url_for('static', filename='immagini/struttura.jpg') }}" target="_blank">
+            <img src="{{ url_for('static', filename='immagini/struttura.jpg') }}" alt="Guarda la struttura">
+        </a>
+        <p style="font-size: 0.9em; color: #555; margin-top: 10px;">
+            Clicca sull'immagine per ingrandire la struttura del serramento
+        </p>
+    </footer>
 <script>
     const img = document.getElementById("immagine_infisso");
     const ante = document.getElementById("numero_ante");
@@ -127,17 +262,43 @@
     function aggiornaImmagine() {
         const n = ante.value;
         const effettoTesto = effetto.value.toLowerCase();
-        const usaLegno = effettoTesto.includes("legno");
 
-        let nome = "";
-        if (n === "1") {
-            nome = usaLegno ? "finestra_singola_legno.jpg" : "finestra_bianca_singola.jpg";
-        } else if (n === "2") {
-            nome = usaLegno ? "finestra_doppia_legno.jpg" : "finestra_bianca_doppia.jpg";
-        } else if (n === "3") {
-            nome = usaLegno ? "finestra_legno_tripla.jpg" : "finestra_bianca_tripla.jpg";
+        // Determina la categoria in base al colore inserito
+        let categoria = "bianca";
+        if (
+            effettoTesto.includes("golden oak") ||
+            effettoTesto.includes("noce") ||
+            effettoTesto.includes("douglasie") ||
+            effettoTesto.includes("oak") ||
+            effettoTesto.includes("af") ||
+            effettoTesto.includes("ac") ||
+            effettoTesto.includes("shogun") ||
+            effettoTesto.includes("mooreiche") ||
+            effettoTesto.includes("eiche") ||
+            effettoTesto.includes("bergkiefer") ||
+            effettoTesto.includes("mahagoni") ||
+            effettoTesto.includes("rosso") ||
+            effettoTesto.includes("braun")
+        ) {
+            categoria = "legno";
+        } else if (
+            effettoTesto.includes("ral 7016") ||
+            effettoTesto.includes("ral 9005") ||
+            effettoTesto.includes("scuro") ||
+            effettoTesto.includes("grigio scuro") ||
+            effettoTesto.includes("black") ||
+            effettoTesto.includes("antracite") ||
+            effettoTesto.includes("earl") ||
+            effettoTesto.includes("quarz") ||
+            effettoTesto.includes("crown") ||
+            effettoTesto.includes("metbrush") ||
+            effettoTesto.includes("db703")
+        ) {
+            categoria = "scuro";
         }
 
+        // Costruisce il nome del file in modo compatto
+        let nome = `finestra_${n === "1" ? "singola" : n === "2" ? "doppia" : "tripla"}_${categoria}.jpg`;
         img.src = "/static/immagini/" + nome;
 
         // Modifica dimensioni immagine in base alle proporzioni
@@ -160,10 +321,28 @@
         }
     }
 
+    // Event listeners
     ante.addEventListener("change", aggiornaImmagine);
     effetto.addEventListener("input", aggiornaImmagine);
     larghezzaInput.addEventListener("input", aggiornaImmagine);
     altezzaInput.addEventListener("input", aggiornaImmagine);
+</script>
+<script>
+    const pellicolatoSelect = document.getElementById("pellicolato");
+    const effettoInput = document.getElementById("effetto_pellicolato");
+
+    function aggiornaObbligatorietaPellicolato() {
+        if (pellicolatoSelect.value === "s") {
+            effettoInput.setAttribute("required", "required");
+        } else {
+            effettoInput.removeAttribute("required");
+        }
+    }
+
+    pellicolatoSelect.addEventListener("change", aggiornaObbligatorietaPellicolato);
+
+    // Esegui subito al caricamento della pagina
+    aggiornaObbligatorietaPellicolato();
 </script>
 </body>
 </html>

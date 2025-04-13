@@ -2,49 +2,115 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Inserisci dati cliente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preventivo online infissi</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        header img { display: block; margin: 0 auto; width: 600px; }
-        .form-container { max-width: 600px; margin: 30px auto; }
-        label { display: block; margin-top: 15px; font-weight: bold; }
-        input { width: 100%; padding: 10px; margin-top: 5px; }
-        button { margin-top: 20px; padding: 10px 20px; font-size: 16px; }
-        footer { margin-top: 50px; text-align: center; }
-        footer img { width: 100%; max-width: 600px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        header img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .form-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 12px 24px;
+            font-size: 18px;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        @media (max-width: 768px) {
+            input, button {
+                font-size: 16px;
+            }
+
+            .form-container {
+                padding: 0 10px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <header>
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
-    </header>
-
-    <div class="form-container">
-        <h2>Compila i dati per calcolare il preventivo</h2>
-        <form method="POST">
-            <label for="nome">Nome</label>
-            <input type="text" name="nome" required>
-
-            <label for="cognome">Cognome</label>
-            <input type="text" name="cognome" required>
-
-            <label for="email">Email</label>
-            <input type="email" name="email" required>
-
-            <label for="indirizzo">Indirizzo</label>
-            <input type="text" name="indirizzo" required>
-
-            <label for="data">Data</label>
-            <input type="text" name="data" value="{{ data_oggi }}" required>
-
-            <button type="submit">Prosegui</button>
-        </form>
+<div class="form-container">
+<header style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+    <!-- Logo a sinistra -->
+    <div>
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="height: 50%;">
     </div>
 
-    <footer>
-        <img src="{{ url_for('static', filename='immagini/pellicole.jpg') }}" alt="Guida alle pellicole">
-    </footer>
+    <!-- Testo a destra -->
+    <div style="flex: 1; font-size: 18px; font-weight: bold; line-height: 1.6; text-align: left; padding-left: 30px;">
+        INFISSI MOBILIFICIO E FALEGNAMERIA<br>
+        <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO<br>
+Cell. 333.4352383</span><br>
+        <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>
+Cell. 389.9686594</span> 
+		    </div>
+</header>
+
+
+        <h2>Compila i dati per calcolare il preventivo</h2>
+        	<form method="POST">
+  		  	<label for="nome">Nome</label>
+ 		  	<input type="text" name="nome" required>
+
+  		 	<label for="cognome">Cognome</label>
+  	 	 	<input type="text" name="cognome" required>
+
+  			<label for="email">Email</label>
+  			<input type="email" name="email" required>
+
+   			<label for="telefono">Telefono</label>
+  		 	<input type="tel" name="telefono" required pattern="[0-9\s\+]+" title="Inserisci un numero valido">
+
+  			 <label for="indirizzo">Indirizzo</label>
+  	 	 	<input type="text" name="indirizzo" required>
+			
+			<label for="citta">Città</label>
+			<input type="text" name="citta" id="citta" required>
+
+  	 		<label for="data">Data</label>
+  		 	<input type="text" name="data" value="{{ data_oggi }}" required>
+
+   		 <button type="submit">Prosegui</button>
+		</form>
+    </div>
 
 </body>
 </html>

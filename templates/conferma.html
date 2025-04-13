@@ -5,42 +5,102 @@
     <title>Conferma Preventivo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='stile.css') }}">
     <style>
-        header img { display: block; margin: 0 auto; width: 600px; }
-        footer img { width: 100%; max-width: 600px; display: block; margin: 50px auto 0; }
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background-color: #FFFFFF;
+        }
+		header img {
+            display: block;
+            margin: 0 auto;
+            max-width: 800px;
+            height: auto;
+        }
         button, a.button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             text-decoration: none;
             font-size: 16px;
+            cursor: pointer;
         }
-        h1, h2 { text-align: center; }
-        ul, ol { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-        li { margin-bottom: 15px; }
-        .center-btn { display: flex; justify-content: center; margin-top: 30px; }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        ul, ol {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+        }
+
+        li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .center-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 600px) {
+            button, a.button {
+                width: 100%;
+                text-align: center;
+            }
+
+            ul, ol {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
+<header style="display: flex; align-items: center; justify-content: center; gap: 40px; padding: 20px;">
+    <!-- Logo -->
+    <div>
+        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="height: 50%;">
+    </div>
 
-<header style="text-align: center; margin-bottom: 20px;">
-    <a href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda" style="max-width: 300px;">
-    </a>
-    <div style="margin-top: 10px;">
-        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    <!-- Testo a destra del logo -->
+    <div style="font-size: 18px; font-weight: bold; line-height: 1.6; text-align: left;">
+        INFISSI MOBILIFICIO E FALEGNAMERIA<br>
+        <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO<br>Cell. 333.4352383</span><br>
+        <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span> 
     </div>
 </header>
+    <div style="margin-top: 10px;text-align: center">
+        <a href="{{ url_for('index') }}" style="text-decoration: none; color: #3b82f6; font-weight: bold;">🏠 Torna alla Home</a>
+    </div>
 
 
 {% if success %}
-    <h1>✅ Preventivo inviato con successo!</h1>
-    <p style="text-align: center;">Puoi scaricarlo cliccando qui:</p>
-    <div class="center-btn">
-        <a class="button" href="{{ url_for('download', filename=file) }}" download>📄 Scarica il tuo preventivo</a>
-    </div>
+<h1>✅ Preventivo inviato con successo!</h1>
+<p style="text-align: center;">Puoi scaricarlo cliccando qui:</p>
+
+<div class="center-btn" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px;">
+    <!-- Pulsante download -->
+    <a class="button" href="{{ url_for('download', filename=file) }}" download>
+        📄 Scarica il tuo preventivo
+    </a>
+
+    <!-- Pulsante email -->
+    <a href="mailto:falegnameriaamerico@tiscali.it"
+       style="display: inline-block; padding: 10px 20px; background-color: #00A021; color: white; text-decoration: none; border-radius: 6px; font-size: 16px;">
+       ✉️ Contattaci via Email
+    </a>
+</div>
+
 {% else %}
     <h1>Conferma i tuoi dati</h1>
 
@@ -56,38 +116,65 @@
     {% endif %}
 
     {% if articoli %}
-    <h2>Articoli inseriti</h2>
-    <ol>
-        {% for articolo in articoli %}
-            <li>
-                <strong>{{ articolo.descrizione }}</strong><br>
+    <h2>Riepilogo Serramenti inseriti</h2>
+    <ol style="list-style: none; padding: 0;">
+    {% for articolo in articoli %}
+        <li style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+            
+            <div style="flex: 1;">
+                <strong>{{ articolo.descrizione | upper }}</strong><br>
                 Dimensioni: {{ articolo.larghezza }} x {{ articolo.altezza }} mm<br>
                 Quantità: {{ articolo.quantita }}<br>
                 Spessore: {{ articolo.spessore }} mm<br>
                 Tipo serramento: {{ articolo.tipo_serramento }}<br>
                 Ante: {{ articolo.numero_ante }}<br>
                 Tipo vetro: 
-                {% if articolo.tipo_vetro == 'doppio' %}Vetro camera base{% elif articolo.tipo_vetro == 'triplo' %}Triplo vetro{% else %}Triplo vetro con gas Argon{% endif %}<br>
-                {% if articolo.cassonetti == 's' %}✔ Cassonetti<br>{% endif %}
-                {% if articolo.avvolgibili == 's' %}✔ Avvolgibili<br>{% endif %}
-                {% if articolo.rullo == 's' %}✔ Rullo calotta<br>{% endif %}
-                {% if articolo.pellicolato == 's' %}✔ Pellicolato: {{ articolo.effetto_pellicolato }}<br>{% endif %}
-                {% if articolo.accessori %}✔ Accessori: {{ articolo.accessori }}<br>{% endif %}
-            </li>
-        {% endfor %}
-    </ol>
-    {% endif %}
+                {% if articolo.tipo_vetro == 'doppio' %}Vetro camera base
+                {% elif articolo.tipo_vetro == 'triplo' %}Triplo vetro
+                {% else %}Triplo vetro con gas Argon{% endif %}<br>
 
-    <div class="center-btn">
-        <form method="POST">
-            <button type="submit">✅ Genera e invia il preventivo</button>
-        </form>
+                Cassonetti: {{ '✔ Sì' if articolo.cassonetti == 's' else 'No' }}<br>
+                Avvolgibili: {{ '✔ Sì' if articolo.avvolgibili == 's' else 'No' }}<br>
+                Rullo calotta: {{ '✔ Sì' if articolo.rullo == 's' else 'No' }}<br>
+                Pellicolato: {% if articolo.pellicolato == 's' %}✔ {{ articolo.effetto_pellicolato }}{% else %}No{% endif %}<br>
+                Accessori: {{ articolo.accessori if articolo.accessori else 'Nessuno' }}
+            </div>
+
+            {% if articolo.immagine %}
+    <div style="flex-shrink: 0;">
+        <img src="/{{ articolo.immagine }}"
+             alt="Immagine infisso"
+             style="max-width: 150px; max-height: 150px; width: 100px; border: 1px solid #ccc; border-radius: 5px; margin-right: 50;">
     </div>
 {% endif %}
 
-<footer>
-    <img src="{{ url_for('static', filename='immagini/pellicole.jpg') }}" alt="Guida pellicole">
-</footer>
+        </li>
+    {% endfor %}
+</ol>
+<br>
+{% if sconto_valore and sconto_valore > 0 %}
+    <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+        <p style="color: #000000; font-weight: bold; font-size: 22px;">
+            ✅ Hai uno <span style="font-size: 26px;">sconto del {{ sconto_percentuale }}%</span><br>
+            <span style="display: block; margin-top: 10px; font-size: 32px;">
+                💰 Risparmio totale: € {{ '%.2f' | format(sconto_valore) }}
+            </span>
+        </p>
+    </div>
+{% endif %}
+<div class="center-btn">
+    <a class="button" href="{{ url_for('modifica_articoli', session=session_id) }}">🔄 Modifica i serramenti</a>
+</div>
+    {% endif %}
 
+    <div class="center-btn">
+    <form method="POST">
+        <button type="submit">✅ Genera e invia il preventivo</button>
+    </form>
+</div>
+
+{% endif %}
+
+</div> 
 </body>
 </html>
