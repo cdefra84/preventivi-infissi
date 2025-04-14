@@ -194,9 +194,9 @@
                value="{{ (articolo.effetto_pellicolato if articolo.effetto_pellicolato is defined else '') | e }}"
                placeholder="Es. RAL 7016 esterno, Bianco massa interno">
 
-        <a href="#" onclick="window.open('{{ url_for('static', filename='immagini/pellicole_colori.jpg') }}', 'pellicole', 'width=800,height=600'); return false;">
-            🎨 Vedi la tabella colori pellicole
-        </a>
+        <a href="#" onclick="window.open('{{ url_for('static', filename='zoom.html') }}', 'pellicole', 'width=800,height=600,scrollbars=yes'); return false;">
+    🎨 Vedi la tabella colori pellicole </a>
+
 
         <img id="immagine_infisso" class="preview-image" src="{{ url_for('static', filename='immagini/finestra_doppia_bianca.jpg') }}" alt="Ante selezionate">
 
@@ -268,47 +268,87 @@
     const larghezzaInput = document.querySelector("input[name='larghezza']");
     const altezzaInput = document.querySelector("input[name='altezza']");
 
+    const immagini = {
+        "ral 6001": {
+            "1": "finestra_singola_RAL6001.jpg",
+            "2": "finestra_doppia_RAL6001.png",
+            "3": "finestra_tripla_RAL6001.png"
+        },
+        "ral 1018": {
+            "1": "finestra_singola_legno.jpg",
+            "2": "finestra_doppia_RAL1018.png",
+            "3": "finestra_tripla_RAL1018.png"
+        },
+        "ral 9001": {
+            "1": "finestra_singola_bianca.jpg",
+            "2": "finestra_doppia_RAL9001.png",
+            "3": "finestra_tripla_bianca.jpg"
+        },
+        "hell": {
+            "1": "finestra_singola_legno.jpg",
+            "2": "finestra_doppia_hell.png",
+            "3": "finestra_tripla_legno.jpg"
+        },
+        "noce": {
+            "1": "finestra_singola_legno.jpg",
+            "2": "finestra_doppia_noce.png",
+            "3": "finestra_tripla_legno.jpg"
+        },
+        "legno": {
+            "1": "finestra_singola_legno.jpg",
+            "2": "finestra_doppia_legno.jpg",
+            "3": "finestra_tripla_legno.jpg"
+        },
+        "bianca": {
+            "1": "finestra_singola_bianca.jpg",
+            "2": "finestra_doppia_bianca.jpg",
+            "3": "finestra_tripla_bianca.jpg"
+        },
+        "scuro": {
+            "1": "finestra_singola_scuro.jpg",
+            "2": "finestra_doppia_scuro.jpg",
+            "3": "finestra_tripla_scuro.jpg"
+        }
+    };
+
     function aggiornaImmagine() {
         const n = ante.value;
-        const effettoTesto = effetto.value.toLowerCase();
+        const effettoTesto = effetto.value.toLowerCase().trim();
 
-        // Determina la categoria in base al colore inserito
-        let categoria = "bianca";
-        if (
-            effettoTesto.includes("golden oak") ||
-            effettoTesto.includes("noce") ||
-            effettoTesto.includes("douglasie") ||
-            effettoTesto.includes("oak") ||
-            effettoTesto.includes("af") ||
-            effettoTesto.includes("ac") ||
-            effettoTesto.includes("shogun") ||
-            effettoTesto.includes("mooreiche") ||
-            effettoTesto.includes("eiche") ||
-            effettoTesto.includes("bergkiefer") ||
-            effettoTesto.includes("mahagoni") ||
-            effettoTesto.includes("rosso") ||
-            effettoTesto.includes("braun")
-        ) {
-            categoria = "legno";
-        } else if (
-            effettoTesto.includes("ral 7016") ||
-            effettoTesto.includes("ral 9005") ||
-            effettoTesto.includes("scuro") ||
-            effettoTesto.includes("grigio scuro") ||
-            effettoTesto.includes("black") ||
-            effettoTesto.includes("antracite") ||
-            effettoTesto.includes("earl") ||
-            effettoTesto.includes("quarz") ||
-            effettoTesto.includes("crown") ||
-            effettoTesto.includes("metbrush") ||
-            effettoTesto.includes("db703")
-        ) {
-            categoria = "scuro";
+        // Controlla se esiste un'immagine specifica per l'effetto
+        let immagine = null;
+
+        if (immagini[effettoTesto] && immagini[effettoTesto][n]) {
+            immagine = immagini[effettoTesto][n];
+        } else {
+            // In base al testo determina la categoria (legno, scuro, bianca)
+            let categoria = "bianca";
+
+            if (
+                effettoTesto.includes("golden oak") || effettoTesto.includes("noce") || effettoTesto.includes("douglasie") ||
+                effettoTesto.includes("oak") || effettoTesto.includes("af") || effettoTesto.includes("ac") ||
+                effettoTesto.includes("shogun") || effettoTesto.includes("mooreiche") || effettoTesto.includes("eiche") ||
+                effettoTesto.includes("bergkiefer") || effettoTesto.includes("mahagoni") || effettoTesto.includes("braun") ||
+                effettoTesto.includes("rosewood") || effettoTesto.includes("winchester") || effettoTesto.includes("streifendouglasie") ||
+                effettoTesto.includes("nussbaum") || effettoTesto.includes("macore") || effettoTesto.includes("hell") ||
+                effettoTesto.includes("sheffield oak grey")
+            ) {
+                categoria = "legno";
+            } else if (
+                effettoTesto.includes("ral 7016") || effettoTesto.includes("ral 9005") || effettoTesto.includes("scuro") ||
+                effettoTesto.includes("grigio scuro") || effettoTesto.includes("black") || effettoTesto.includes("antracite") ||
+                effettoTesto.includes("earl") || effettoTesto.includes("quarz") || effettoTesto.includes("crown") ||
+                effettoTesto.includes("metbrush") || effettoTesto.includes("db703") || effettoTesto.includes("platin") ||
+                effettoTesto.includes("aluminium") || effettoTesto.includes("ral 7012") || effettoTesto.includes("ral 7039") ||
+                effettoTesto.includes("ral 5004") || effettoTesto.includes("ral 3005") || effettoTesto.includes("ral 3002")
+            ) {
+                categoria = "scuro";
+            }
+
+            immagine = immagini[categoria][n];
         }
 
-        // Costruisce il nome del file in modo compatto
-        let nome = `finestra_${n === "1" ? "singola" : n === "2" ? "doppia" : "tripla"}_${categoria}.jpg`;
-        img.src = "/static/immagini/" + nome;
+        img.src = "/static/immagini/" + immagine;
 
         // Modifica dimensioni immagine in base alle proporzioni
         const larghezza = parseFloat(larghezzaInput.value);
@@ -336,6 +376,7 @@
     larghezzaInput.addEventListener("input", aggiornaImmagine);
     altezzaInput.addEventListener("input", aggiornaImmagine);
 </script>
+
 <script>
     const pellicolatoSelect = document.getElementById("pellicolato");
     const effettoInput = document.getElementById("effetto_pellicolato");

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lente pellicole</title>
+  <style>
+    body {
+      margin: 0;
+      background: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .img-zoom-container {
+      position: relative;
+    }
+
+    .img-zoom-lens {
+      position: absolute;
+      border: 3px solid #000;
+      border-radius: 50%;
+      width: 150px;
+      height: 150px;
+      background-repeat: no-repeat;
+      background-size: 1000px 1000px;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(0,0,0,0.4);
+    }
+
+    img {
+      max-width: 90vw;
+      height: auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="img-zoom-container">
+    <img id="img" src="immagini/pellicole_colori.jpg" alt="Pellicole">
+    <div id="lens" class="img-zoom-lens"></div>
+  </div>
+
+  <script>
+    const img = document.getElementById("img");
+    const lens = document.getElementById("lens");
+
+    lens.style.backgroundImage = `url('${img.src}')`;
+
+    img.addEventListener("mousemove", moveLens);
+    lens.addEventListener("mousemove", moveLens);
+    img.addEventListener("touchmove", moveLens);
+    lens.addEventListener("touchmove", moveLens);
+
+    function moveLens(e) {
+      e.preventDefault();
+
+      const pos = getCursorPos(e);
+      let x = pos.x - lens.offsetWidth / 2;
+      let y = pos.y - lens.offsetHeight / 2;
+
+      // Limiti
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+      if (x > img.width - lens.offsetWidth) x = img.width - lens.offsetWidth;
+      if (y > img.height - lens.offsetHeight) y = img.height - lens.offsetHeight;
+
+      lens.style.left = x + "px";
+      lens.style.top = y + "px";
+
+      const fx = img.naturalWidth / img.width;
+      const fy = img.naturalHeight / img.height;
+
+      lens.style.backgroundSize = `${img.naturalWidth}px ${img.naturalHeight}px`;
+      lens.style.backgroundPosition = `-${x * fx}px -${y * fy}px`;
+    }
+
+    function getCursorPos(e) {
+      const a = img.getBoundingClientRect();
+      let x = e.pageX - a.left - window.pageXOffset;
+      let y = e.pageY - a.top - window.pageYOffset;
+
+      // Touch support
+      if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].pageX - a.left - window.pageXOffset;
+        y = e.touches[0].pageY - a.top - window.pageYOffset;
+      }
+
+      return { x: x, y: y };
+    }
+  </script>
+</body>
+</html>
