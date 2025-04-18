@@ -133,6 +133,30 @@
 {% if success %}
     <h1>✅ Preventivo inviato con successo!</h1>
     <p style="text-align: center;">Puoi scaricarlo cliccando qui:</p>
+{% if info_tecniche %}
+<ul style="max-width: 600px; margin: 20px auto; background: #f0f8ff; padding: 20px; border-radius: 10px; box-shadow: 0 0 8px rgba(0,0,0,0.05);">
+  <li><strong>Zona climatica rilevata:</strong> {{ info_tecniche.zona_climatica or "N/A" }}</li>
+  <li><strong>Uw minimo richiesto:</strong> {{ info_tecniche.requisito_uw or "N/A" }} W/m²K</li>
+  <li><strong>Uw del serramento:</strong> {{ info_tecniche.uw or "N/A" }} W/m²K</li>
+  
+  {% if info_tecniche.conforme is not none %}
+    <li><strong>Verifica:</strong>
+      {% if info_tecniche.conforme %}
+        ✅ Conforme ai requisiti
+      {% else %}
+        ⚠️ Non conforme – potrebbero servire vetri a maggiore isolamento
+        <br><em style="color: #c0392b;">
+          💡 Suggerimento: Ti consigliamo di considerare l’uso di vetri a maggiore isolamento termico,
+          come vetro <strong>triplo</strong> o <strong>triplo con gas Argon</strong>, per rispettare i requisiti della tua zona climatica.
+        </em>
+      {% endif %}
+    </li>
+  {% else %}
+    <li><strong>Verifica:</strong> ⚠️ Dato non disponibile – non è stato possibile determinare la zona climatica</li>
+  {% endif %}
+</ul>
+
+{% endif %}
 
     <div class="center-btn">
         <a class="button" href="{{ url_for('download', filename=file) }}" download>

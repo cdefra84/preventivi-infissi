@@ -1,0 +1,8 @@
+{
+  "A": { "Uw_minimo": 2.6 },
+  "B": { "Uw_minimo": 2.4 },
+  "C": { "Uw_minimo": 2.1 },
+  "D": { "Uw_minimo": 1.9 },
+  "E": { "Uw_minimo": 1.7 },
+  "F": { "Uw_minimo": 1.0 }
+}

@@ -121,6 +121,13 @@ def calcola_distanza_km(citta_destinazione):
     coord_destinazione = (destinazione.latitude, destinazione.longitude)
     return round(geodesic(coord_origine, coord_destinazione).km, 2)
 
+def get_zona_climatica(citta):
+    try:
+        with open("comuni_zona_climatica.json", "r", encoding="utf-8") as f:
+            mapping = json.load(f)
+        return mapping.get(citta.strip().lower())
+    except:
+        return None
 
 def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     pdf = PDF()
@@ -208,6 +215,14 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         dettagli.append(f"Vasistas (Ribaltabile): {'Sì' if vasistas == 's' else 'No'}")
         dettagli.append(f"Pellicolato: {effetto if pellicolato == 's' else 'No'}")
         dettagli.append(f"Accessori: {accessori if accessori else 'Nessuno'}")
+        if a.get("soglia_ribassata") == "s":
+            dettagli.append(f"Soglia ribassata: Sì – quantità {a['quantita']}")
+        else:
+            dettagli.append("Soglia ribassata: No")
+        dettagli.append("Piattina da 30")
+        colore_guida = effetto if pellicolato == "s" else "bianco"
+        dettagli.append(f"Guida distanziali in alluminio da 58 colore {colore_guida}")
+
 
         prezzo_mq_base = prezzi.get(f"vetro_{a.get('tipo_vetro', 'doppio')}", prezzi["vetro_doppio"])
         delta = a["spessore"] - prezzi["spessore_base"]
@@ -217,16 +232,20 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         prezzo_unitario *= fattore_spessore
         if a.get("pellicolato") == "s":
             prezzo_unitario *= (1 + prezzi["pellicolato_percentuale"] / 100)
+        # Imposta prezzo minimo per infisso (per singolo pezzo)
+        prezzo_unitario = max(prezzo_unitario, prezzi.get("prezzo_minimo_infisso", 180))
         tot = prezzo_unitario * a["quantita"]
         totale += tot
 
         # calcolo altezza blocco
         pdf.set_font("Arial", "", 9)
-        desc_lines = sum([len(pulisci_testo_pdf(p)) // 80 + 1 for p in dettagli])
-        altezza_blocco = max(45, 6 * (desc_lines + 2))
+        line_height = 5  # pixel per riga
+        padding = 8      # margini sopra/sotto totali
+        altezza_blocco = line_height * len(dettagli) + padding
+
 
         # controllo spazio pagina
-        if pdf.get_y() + altezza_blocco + 20 > 280:
+        if pdf.get_y() + altezza_blocco > 270:
             pdf.add_page()
             pdf.set_fill_color(150, 200, 240)
             scrivi_intestazione_tabella(pdf)
@@ -406,37 +425,33 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         "Tutti i lavori saranno eseguiti da posatore installatore certificato senior (EQF3)."
     ))
 
-    pdf.ln(15)
+    # 🔽 Spazio minimo richiesto per firma e intestazione
+    spazio_firma = 20
 
-    # Firma e intestazione finale
-    firma_path = os.path.join("static", "immagini", "firma.png")
-    spazio_firma = 30  # spazio richiesto per firma + intestazione
-
-    # ⚠️ Se siamo troppo vicini al fondo, ci alziamo un po’ per evitare lo slittamento
+    # 🔄 Se siamo troppo vicini al fondo, vai a nuova pagina
     if pdf.get_y() + spazio_firma > 270:
-        pdf.set_y(270 - spazio_firma)  # sposta verso l'alto invece di andare a nuova pagina
+        pdf.add_page()
+        pdf.set_y(240)  # parti da un'altezza comoda nella nuova pagina
+    else:
+        pdf.ln(5)  # altrimenti, solo un po' di spazio in più
 
-    # Coordinate per l'immagine della firma
-    x_firma = pdf.w - 55  # posizione più a destra
+    # 📌 Inserimento firma
+    firma_path = os.path.join("static", "immagini", "firma.png")
+    x_firma = pdf.w - 55
     y_firma = pdf.get_y() + 5
 
-    # Inserisci l'immagine della firma
+    # ✅ Inserisci immagine firma se esiste
     if os.path.exists(firma_path):
         pdf.image(firma_path, x=x_firma, y=y_firma, w=40)
 
-    # Sposta testo 10 mm più verso il centro
+    # ✍️ Testi a lato firma
     x_testo = x_firma - 15
-
-    # Scritta "FIRMA"
     pdf.set_xy(x_testo, y_firma + 15)
     pdf.set_font("Arial", "B", 7)
     pdf.cell(0, 5, "FIRMA", ln=True, align="R")
 
-    # Scritta "INFISSI di MICHELE AMERICO"
     pdf.set_font("Arial", "I", 7)
     pdf.cell(0, 5, "INFISSI di MICHELE AMERICO", ln=True, align="R")
-
-
 
     # Seconda pagina: Specifiche tecniche
     pdf.set_xy(10, pdf.get_y() + 15)  # Sposta leggermente più in basso e a sinistra
@@ -450,7 +465,36 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     pdf.cell(95, 8, "Caratteristica", border=1)
     pdf.cell(95, 8, "Valore", border=1, ln=True)
 
-    # Valori tabellari
+    # 🔄 Carica valori tecnici dinamici
+    with open("valori_tecnici.json", "r") as f:
+        valori_tecnici = json.load(f)
+
+    # Prendi il primo infisso come riferimento per materiale e vetro
+    tipo_materiale = articoli[0].get("tipo_serramento", "PVC").capitalize()
+    tipo_vetro = "vetro_" + articoli[0].get("tipo_vetro", "doppio")
+
+    valori = valori_tecnici.get(tipo_materiale, {})
+    vetro = valori.get(tipo_vetro, {})
+
+    # Default di fallback
+    uw = vetro.get("Uw", "1.2")
+    acustica = vetro.get("acustica", "35")
+    aria = valori.get("aria", "Classe 4")
+    acqua = valori.get("acqua", "E750")
+    vento = valori.get("vento", "C4")
+
+    zona_climatica = get_zona_climatica(cliente.get("citta", ""))
+    requisito_uw = None
+    conforme = None
+    
+    if zona_climatica:
+        with open("zone_climatiche.json", "r") as f:
+            zone_data = json.load(f)
+        requisito_uw = zone_data.get(zona_climatica, {}).get("Uw_minimo")
+        if requisito_uw:
+            conforme = float(uw) <= float(requisito_uw)
+
+
     pdf.set_font("Arial", "", 8)
     righe = [
         ("Profondità telaio", "76 mm"),
@@ -465,18 +509,27 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         ("Trasmittanza nodo fino a", "Uf=1,0W/m²K"),
         ("Resistenza al fuoco", "1"),
         ("Portate cerniere fino a", "130 kg"),
-        ("Trasmittanza termica serramento fino a", "Uw=0,8W/m²K"),
-        ("Permeabilità all’aria fino a", "Classe 4"),
-        ("Tenuta all’acqua fino a", "E750"),
-        ("Resistenza al vento fino a", "C4"),
+        ("Trasmittanza termica serramento fino a", f"Uw={uw}W/m²K"),
+        ("Permeabilità all’aria fino a", aria),
+        ("Tenuta all’acqua fino a", acqua),
+        ("Resistenza al vento fino a", vento),
         ("Antieffrazione fino a", "RC3"),
-        ("Abbattimento acustico fino a", "47 dB"),
-        ]
+        ("Abbattimento acustico fino a", f"{acustica} dB"),
+    ]
+
+    if requisito_uw:
+        righe.append(("Uw minimo richiesto in zona " + zona_climatica, f"{requisito_uw} W/m²K"))
+
+    if requisito_uw:
+        conforme = float(uw) <= float(requisito_uw)
+        stato = "✅ Conforme" if conforme else "⚠️ NON Conforme"
+        righe.append(("Verifica trasmittanza", stato))
     
     # Scrittura tabella tecnica
     for caratteristica, valore in righe:
         pdf.cell(95, 8, pulisci_testo_pdf(caratteristica), border=1)
         pdf.cell(95, 8, pulisci_testo_pdf(valore), border=1, ln=True)
+
 
     # 🔽 ORA calcola lo spazio rimasto
     img_pellicole = os.path.join("static", "immagini", "struttura.jpg")
@@ -495,6 +548,14 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     pdf.output(filepath)
 
     invia_email(cliente["email"], filepath, numero_preventivo)
+
+    return {
+        "uw": uw,
+        "zona_climatica": zona_climatica,
+        "requisito_uw": requisito_uw,
+        "conforme": conforme
+    }
+
 
 import smtplib, ssl
 from email.message import EmailMessage
@@ -627,7 +688,7 @@ def index():
 
 def determina_categoria(effetto):
     effetto = effetto.lower()
-    if any(x in effetto for x in ["golden oak", "noce", "douglasie", "oak", "af", "ac", "shogun", "mooreiche", "eiche", "bergkiefer", "mahagoni", "rosso", "braun"]):
+    if any(x in effetto for x in ["legno", "golden oak", "noce", "douglasie", "oak", "af", "ac", "shogun", "mooreiche", "eiche", "bergkiefer", "mahagoni", "rosso", "braun"]):
         return "legno"
     elif any(x in effetto for x in ["ral 7016", "ral 9005", "scuro", "grigio scuro", "black", "antracite", "earl", "quarz", "crown", "metbrush", "db703"]):
         return "scuro"
@@ -733,13 +794,20 @@ def conferma():
         os.makedirs("preventivi", exist_ok=True)
 
         try:
-            genera_pdf(cliente, articoli, filepath, numero_preventivo)
+            # 🔁 genera_pdf ora restituisce info_tecniche
+            info_tecniche = genera_pdf(cliente, articoli, filepath, numero_preventivo)
 
             # ✅ Elimina i file temporanei della sessione
             os.remove(f"sessione/cliente_{session_id}.json")
             os.remove(f"sessione/articoli_{session_id}.json")
 
-            return render_template("conferma.html", success=True, file=filename, session_id=session_id)
+            return render_template(
+                "conferma.html",
+                success=True,
+                file=filename,
+                session_id=session_id,
+                info_tecniche=info_tecniche  # ✅ Passa i dati tecnici al template
+            )
         except Exception as e:
             return f"<h1>Errore nella generazione del PDF</h1><p>{e}</p>", 500
 
@@ -754,7 +822,7 @@ def conferma():
     sconto_percentuale, sconto_valore = calcola_sconto_migliore(imponibile, totale_pezzi, prezzi)
     sconto_valore = round(sconto_valore, 2)
 
-    # RENDER CON SCONTO
+    # RENDER CON SCONTO (niente info_tecniche in GET)
     return render_template(
         "conferma.html",
         cliente=cliente,
@@ -794,9 +862,10 @@ def prezzi_view():
             except ValueError:
                 pass  # ignora valori non validi
 
-        # Se i nuovi campi non esistono ancora nel file, li aggiunge con default
+        # Imposta i valori di default se non esistono
         prezzi.setdefault("costo_giornata", 150.0)
         prezzi.setdefault("costo_km", 0.5)
+        prezzi.setdefault("prezzo_minimo_infisso", 180.0)
 
         with open(prezzi_file, "w") as f:
             json.dump(prezzi, f, indent=4)
@@ -810,9 +879,9 @@ def prezzi_view():
     # Default se non presenti
     prezzi.setdefault("costo_giornata", 150.0)
     prezzi.setdefault("costo_km", 0.5)
+    prezzi.setdefault("prezzo_minimo_infisso", 180.0)
 
     return render_template("prezzi.html", prezzi=prezzi)
-
 
 @app.route("/modifica-articoli")
 def modifica_articoli():

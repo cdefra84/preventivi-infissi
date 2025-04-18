@@ -1,0 +1,53 @@
+{
+  "PVC": {
+    "vetro_doppio": {
+      "Uw": 1.3,
+      "acustica": 32
+    },
+    "vetro_triplo": {
+      "Uw": 1.1,
+      "acustica": 36
+    },
+    "vetro_argon": {
+      "Uw": 0.9,
+      "acustica": 38
+    },
+    "aria": "Classe 4",
+    "acqua": "E750",
+    "vento": "C4"
+  },
+  "Alluminio": {
+    "vetro_doppio": {
+      "Uw": 1.5,
+      "acustica": 30
+    },
+    "vetro_triplo": {
+      "Uw": 1.3,
+      "acustica": 34
+    },
+    "vetro_argon": {
+      "Uw": 1.0,
+      "acustica": 36
+    },
+    "aria": "Classe 3",
+    "acqua": "E600",
+    "vento": "C3"
+  },
+  "Legno": {
+    "vetro_doppio": {
+      "Uw": 1.2,
+      "acustica": 34
+    },
+    "vetro_triplo": {
+      "Uw": 1.0,
+      "acustica": 37
+    },
+    "vetro_argon": {
+      "Uw": 0.85,
+      "acustica": 39
+    },
+    "aria": "Classe 4",
+    "acqua": "E900",
+    "vento": "C4"
+  }
+}

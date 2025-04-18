@@ -150,6 +150,9 @@
 
       <label>Costo viaggio per km (€)</label>
       <input type="number" step="0.01" name="costo_km" value="{{ prezzi.costo_km or 0.5 }}">
+		
+   	<label>Prezzo minimo per infisso (€)</label>
+	<input type="number" step="0.01" name="prezzo_minimo_infisso" value="{{ prezzi.prezzo_minimo_infisso or 180 }}">
 
       <button type="submit">💾 Salva Prezzi</button>
     </form>

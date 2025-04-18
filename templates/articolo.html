@@ -223,11 +223,16 @@
             <option value="n" {% if articolo.vasistas == 'n' %}selected{% endif %}>No</option>
             <option value="s" {% if articolo.vasistas == 's' %}selected{% endif %}>Sì</option>
         </select>
+		<label>Soglia ribassata?</label>
+		<select name="soglia_ribassata">
+  		  <option value="n" {% if articolo.soglia_ribassata == 'n' %}selected{% endif %}>No</option>
+   		 <option value="s" {% if articolo.soglia_ribassata == 's' %}selected{% endif %}>Sì</option>
+		</select>
 
         <label for="accessori">Accessori (inserisci il tipo maniglia e il colore)</label>
         <input name="accessori" id="accessori" class="form-control"
                value="{{ (articolo.accessori if articolo.accessori is defined else '') | e }}"
-               placeholder="Es. Maniglia base titanio, Maniglia PRO satinata">
+               placeholder="Es. Maniglia base titanio, Maniglia DK Quadra">
 
         <p>
             <a href="#" onclick="window.open('{{ url_for('static', filename='immagini/Maniglie_colori.jpg') }}', 'maniglie_pro', 'width=800,height=600,scrollbars=yes'); return false;">
