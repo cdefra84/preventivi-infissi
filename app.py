@@ -213,7 +213,15 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         dettagli.append(f"Avvolgibili: {'Sì' if avvolgibili == 's' else 'No'}")
         dettagli.append(f"Rullo puleggia: {'Sì' if rullo == 's' else 'No'}")
         dettagli.append(f"Vasistas (Ribaltabile): {'Sì' if vasistas == 's' else 'No'}")
-        dettagli.append(f"Pellicolato: {effetto if pellicolato == 's' else 'No'}")
+        if pellicolato == 's':
+            if "-" in effetto:
+                interno, esterno = effetto.split("-", 1)
+                dettagli.append(f"Pellicolato bicolore: Interno {interno.strip()} / Esterno {esterno.strip()}")
+            else:
+                dettagli.append(f"Pellicolato: {effetto}")
+        else:
+            dettagli.append("Pellicolato: No")
+
         dettagli.append(f"Accessori: {accessori if accessori else 'Nessuno'}")
         if a.get("soglia_ribassata") == "s":
             dettagli.append(f"Soglia ribassata: Sì – quantità {a['quantita']}")
@@ -232,6 +240,9 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         prezzo_unitario *= fattore_spessore
         if a.get("pellicolato") == "s":
             prezzo_unitario *= (1 + prezzi["pellicolato_percentuale"] / 100)
+            if "-" in effetto:
+                prezzo_unitario *= (1 + prezzi.get("pellicolato_bicolore_percentuale", 10) / 100)
+
         # Imposta prezzo minimo per infisso (per singolo pezzo)
         prezzo_unitario = max(prezzo_unitario, prezzi.get("prezzo_minimo_infisso", 180))
         tot = prezzo_unitario * a["quantita"]
@@ -288,7 +299,8 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
 
         # Ottieni dimensioni originali
         from PIL import Image
-        img = Image.open(immagine_output)
+        img_path = os.path.join("static", a["immagine"]) if not a["immagine"].startswith("static") else a["immagine"]
+        img = Image.open(img_path)
         larghezza_img, altezza_img = img.size
         rapporto = larghezza_img / altezza_img
 
@@ -297,8 +309,8 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         h = w / rapporto
 
         # Inserisci immagine scalata
-        if os.path.exists(immagine_output):
-            pdf.image(immagine_output, x=x_img, y=y_img, w=w, h=h)
+        if os.path.exists(img_path):
+            pdf.image(img_path, x=x_img, y=y_img, w=w, h=h)
 
         # Linee di quota immagine
         altezza_testo = 4  # altezza del font
@@ -380,7 +392,11 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     # Mostra IVA e Totale scontato
     pdf.set_font("Arial", "", 8)
     pdf.cell(0, 5, pulisci_testo_pdf(f"IVA 10%: {iva:.2f} EUR"), ln=True, align="R")
+    pdf.set_font("Arial", "B", 10)
+    pdf.cell(0, 5, pulisci_testo_pdf(f"Totale comprensivo di IVA: {totale_finale:.2f} EUR"), ln=True, align="R")
 
+    pdf.ln(5)
+    
     # Note fiscali e lavorazione
     pdf.set_font("Arial", "", 8)
     pdf.multi_cell(0, 5, pulisci_testo_pdf(
@@ -392,26 +408,24 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         "Il costo della pratica, che varia in base alla tipologia dell’intervento e all’eventuale necessità di asseverazione tecnica, "
         "è già stato considerato nel totale indicato."
     ))
-    pdf.ln(5)
-    pdf.set_font("Arial", "I", 8)
+    pdf.set_font("Arial", "", 8)
     pdf.cell(0, 5, pulisci_testo_pdf("Lavoro comprensivo di smontaggio, smaltimento e montaggio completo dei serramenti,"), ln=True, align="L")
     pdf.set_font("Arial", "U", 8)
     pdf.cell(0, 5, pulisci_testo_pdf("inclusa rifinitura finale in opera eseguita a regola d'arte."), ln=True, align="L")
-    pdf.set_font("Arial", "B", 8)
-    pdf.cell(0, 10, pulisci_testo_pdf(f"Totale comprensivo di IVA: {totale_finale:.2f} EUR"), ln=True, align="R")
 
     pdf.set_font("Arial", "", 7)
     pdf.cell(0, 5, pulisci_testo_pdf(
         f"Tempi stimati per l'esecuzione dei lavori: circa {mesi} mesi dalla conferma dell'ordine."), ln=True)
-    pdf.ln(5)
 
     pdf.multi_cell(0, 5, pulisci_testo_pdf(
         "La trasferta sarà valorizzata separatamente in base alla località di installazione "
         "e alla durata stimata della manodopera. Tale voce verrà definita in fase di conferma ordine."
     ))
-    pdf.ln(5)
+    pdf.set_font("Arial", "", 7)
     pdf.multi_cell(0, 5, pulisci_testo_pdf(
-        "Pagamento: 40% all'accettazione del preventivo e saldo alla consegna.\n\n"
+        "Pagamento: 40% all'accettazione del preventivo e saldo alla consegna.\n\n"))
+    pdf.set_font("Arial", "I", 8)
+    pdf.multi_cell(0, 5, pulisci_testo_pdf(
         "N.B. L’offerta è da considerarsi indicativa ed è valida per 10 giorni dalla data riportata in calce."
     ))
     pdf.ln(5)
@@ -426,7 +440,7 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     ))
 
     # 🔽 Spazio minimo richiesto per firma e intestazione
-    spazio_firma = 20
+    spazio_firma = 10
 
     # 🔄 Se siamo troppo vicini al fondo, vai a nuova pagina
     if pdf.get_y() + spazio_firma > 270:
@@ -446,12 +460,17 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
 
     # ✍️ Testi a lato firma
     x_testo = x_firma - 15
-    pdf.set_xy(x_testo, y_firma + 15)
+    y_testo = y_firma + 5  # posizione iniziale sotto la firma
+
+    pdf.set_xy(x_testo, y_testo)
     pdf.set_font("Arial", "B", 7)
     pdf.cell(0, 5, "FIRMA", ln=True, align="R")
 
+    # Riga successiva con spazio maggiore
+    pdf.set_xy(x_testo, y_testo + 7)  # 7 invece di 4 per evitare accavallamento
     pdf.set_font("Arial", "I", 7)
     pdf.cell(0, 5, "INFISSI di MICHELE AMERICO", ln=True, align="R")
+
 
     # Seconda pagina: Specifiche tecniche
     pdf.set_xy(10, pdf.get_y() + 15)  # Sposta leggermente più in basso e a sinistra
@@ -504,10 +523,9 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         ("Altezza battuta telaio", "25 mm"),
         ("Spessore battuta telaio-anta", "9 mm"),
         ("Spessori vetro fino a", "55 mm"),
-        ("Incollaggio vetro", "opzionale"),
         ("Sistema guarnizioni", "Tripla guarnizione"),
         ("Trasmittanza nodo fino a", "Uf=1,0W/m²K"),
-        ("Resistenza al fuoco", "1"),
+        ("Resistenza al fuoco", "Classe EI30 secondo EN 13501-2"),
         ("Portate cerniere fino a", "130 kg"),
         ("Trasmittanza termica serramento fino a", f"Uw={uw}W/m²K"),
         ("Permeabilità all’aria fino a", aria),
@@ -516,13 +534,12 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         ("Antieffrazione fino a", "RC3"),
         ("Abbattimento acustico fino a", f"{acustica} dB"),
     ]
-
     if requisito_uw:
         righe.append(("Uw minimo richiesto in zona " + zona_climatica, f"{requisito_uw} W/m²K"))
 
     if requisito_uw:
         conforme = float(uw) <= float(requisito_uw)
-        stato = "✅ Conforme" if conforme else "⚠️ NON Conforme"
+        sstato = "[✓] Conforme al requisito di trasmittanza della tua zona climatica" if conforme else "[X] NON conforme al requisito di trasmittanza della tua zona climatica"
         righe.append(("Verifica trasmittanza", stato))
     
     # Scrittura tabella tecnica
@@ -555,6 +572,13 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         "requisito_uw": requisito_uw,
         "conforme": conforme
     }
+    # Elimina le immagini generate nella cartella temporanea
+    import glob
+    for img_path in glob.glob(f"static/immagini_generati/infisso_{cliente['email'].split('@')[0]}_*.png"):
+        try:
+            os.remove(img_path)
+        except Exception as e:
+            print(f"Errore nella rimozione di {img_path}: {e}")
 
 
 import smtplib, ssl
@@ -570,17 +594,21 @@ def invia_email(cliente_email, allegato_path, numero_preventivo):
     msg.set_content("""\
 Gentile Cliente,
 
-in allegato trova il preventivo dettagliato relativo alla sua richiesta di infissi.  
+in allegato trova il **preventivo indicativo** relativo alla sua richiesta di cambio serramenti interni.
 
-❗ Si prega di **non rispondere a questa email (noreply@bit4k.com)**.  
-Per qualsiasi chiarimento o modifica, la invitiamo a contattarci telefonicamente o tramite la mail indicata qui sotto.
+Le consigliamo di **conservare il numero di preventivo riportato nell’oggetto**, in quanto sarà necessario per l'elaborazione del preventivo definitivo.
+
+Eventuali **accessori, persiane o zanzariere aggiuntive** potranno essere inserite nell’offerta finale, se richiesto.
+
+❗ La preghiamo di **non rispondere a questa email**.  
+Per chiarimenti o modifiche, può contattarci telefonicamente o all’indirizzo email indicato in calce.
 
 Cordiali saluti,
 
-INFISSI MOBILIFICIO E FALEGNAMERIA MICHELE AMERICO  
-SHOWROOM ROCCHETTA SANT'ANTONIO – Cell. 333.4352383  
-SHOWROOM MONTEFALCIONE (AV) – Cell. 389.9686594  
-Email: falegnameriaamerico@tiscali.it
+INFISSI – MOBILIFICIO E FALEGNAMERIA MICHELE AMERICO  
+📍 Showroom Rocchetta Sant’Antonio – Cell. 333.4352383  
+📍 Showroom Montefalcione (AV) – Cell. 389.9686594  
+📧 Email: falegnameriaamerico@tiscali.it
 """)
 
     with open(allegato_path, "rb") as f:
@@ -597,11 +625,10 @@ Email: falegnameriaamerico@tiscali.it
 
 from PIL import Image, ImageDraw, ImageFont
 
-def ridimensiona_immagine_infisso(larghezza_mm, altezza_mm, path_input, path_output, con_quote=False):
+def ridimensiona_immagine_infisso(larghezza_mm, altezza_mm, path_input, session_id, numero, con_quote=False):
     try:
         img = Image.open(path_input).convert("RGB")
 
-        # Calcola proporzioni reali (conversione mm → px)
         rapporto = altezza_mm / larghezza_mm
         base = 150
 
@@ -617,10 +644,13 @@ def ridimensiona_immagine_infisso(larghezza_mm, altezza_mm, path_input, path_out
 
         img = img.resize((nuova_larghezza, nuova_altezza), Image.LANCZOS)
 
+        os.makedirs("static/immagini_generati", exist_ok=True)
+        nome_file = f"infisso_{session_id}_{numero}.png"
+        path_output = os.path.join("static/immagini_generati", nome_file)
+
         if not con_quote:
-            # Salva direttamente l'immagine senza quote
             img.save(path_output, format="PNG")
-            return
+            return os.path.join("static", "immagini_generati", nome_file).replace("\\", "/")
 
         # Altrimenti: aggiungi quote su canvas più grande
         canvas_w = nuova_larghezza + 80
@@ -688,11 +718,41 @@ def index():
 
 def determina_categoria(effetto):
     effetto = effetto.lower()
-    if any(x in effetto for x in ["legno", "golden oak", "noce", "douglasie", "oak", "af", "ac", "shogun", "mooreiche", "eiche", "bergkiefer", "mahagoni", "rosso", "braun"]):
-        return "legno"
-    elif any(x in effetto for x in ["ral 7016", "ral 9005", "scuro", "grigio scuro", "black", "antracite", "earl", "quarz", "crown", "metbrush", "db703"]):
+
+    if any(x in effetto for x in [
+        "legno", "golden oak", "noce", "douglasie", "oak", "af", "ac", "shogun",
+        "mooreiche", "eiche", "bergkiefer", "mahagoni", "rosso", "braun", "hell"
+    ]):
+        return "noce"
+
+    elif any(x in effetto for x in [
+        "ral 6001", "verde", "ral6001"
+    ]):
+        return "RAL6001"
+
+    elif any(x in effetto for x in [
+        "ral 1018", "giallo", "ral1018"
+    ]):
+        return "RAL1018"
+
+    elif any(x in effetto for x in [
+        "ral 9001", "crema", "ral9001"
+    ]):
+        return "RAL9001"
+
+    elif any(x in effetto for x in [
+        "ral 3002", "ral 3003", "ral 3005", "ral 3011", "rosso rubino", "rosso vino", "ral3002", "ral3003", "ral3005", "ral3011"
+    ]):
+        return "RAL3002"
+
+    elif any(x in effetto for x in [
+        "ral 7016", "ral 9005", "grigio scuro", "antracite", "scuro", "black", "nero",
+        "earl", "quarz", "crown", "metbrush", "db703", "7016", "9005"
+    ]):
         return "scuro"
+
     return "bianca"
+
 
 @app.route("/articolo/<int:n>", methods=["GET", "POST"])
 def articolo(n):
@@ -703,7 +763,7 @@ def articolo(n):
     lista_file = f"sessione/articoli_{session_id}.json"
     articoli = []
 
-    # Carica gli articoli esistenti (se presenti)
+    # Carica gli articoli esistenti
     if os.path.exists(lista_file):
         with open(lista_file, "r") as f:
             articoli = json.load(f)
@@ -718,17 +778,33 @@ def articolo(n):
         ante = request.form.get("numero_ante", "2")
         modello = "singola" if ante == "1" else "doppia" if ante == "2" else "tripla"
 
-        immagine_base = f"static/immagini/finestra_{modello}_{categoria}.jpg"
-        immagine_output = f"static/immagini/finestra_{modello}_{categoria}_{n}.png"
+        # 🔍 Cerca immagine base con estensione .jpg o .png
+        immagine_base = None
+        for ext in [".jpg", ".png"]:
+            possibile = f"static/immagini/finestra_{modello}_{categoria}{ext}"
+            if os.path.exists(possibile):
+                immagine_base = possibile
+                break
 
-        # Ridimensiona immagine e salvala
-        if os.path.exists(immagine_base):
-            ridimensiona_immagine_infisso(
+        # 🧹 Rimuove immagine generata vecchia per assicurare aggiornamento
+        path_vecchia = os.path.join("static", "immagini_generati", f"infisso_{session_id}_{n}.png")
+        if os.path.exists(path_vecchia):
+            os.remove(path_vecchia)
+
+        # 🖼️ Genera nuova immagine se possibile, altrimenti fallback
+        if immagine_base:
+            immagine_output = ridimensiona_immagine_infisso(
                 float(request.form["larghezza"]),
                 float(request.form["altezza"]),
                 immagine_base,
-                immagine_output
+                session_id,
+                n
             )
+        else:
+            immagine_output = "static/immagini/finestra_doppia_bianca.jpg"
+
+        # 🔁 Percorso relativo per HTML
+        immagine_rel = immagine_output.replace("static/", "") if immagine_output else None
 
         articolo = {
             "descrizione": request.form["descrizione"],
@@ -747,13 +823,14 @@ def articolo(n):
             "tipo_vetro": request.form.get("tipo_vetro", "doppio"),
             "numero_ante": ante,
             "tipo_serramento": request.form.get("tipo_serramento", "pvc"),
-            "immagine": immagine_output
+            "immagine": immagine_rel
         }
 
+        # Salvataggio/modifica articolo
         if modifica and n - 1 < len(articoli):
-            articoli[n - 1] = articolo  # Modifica
+            articoli[n - 1] = articolo
         else:
-            articoli.append(articolo)  # Aggiunta
+            articoli.append(articolo)
 
         with open(lista_file, "w") as f:
             json.dump(articoli, f)
@@ -770,6 +847,7 @@ def articolo(n):
                            articolo=articolo_da_modificare,
                            articoli=articoli,
                            session_id=session_id)
+
 
 @app.route("/conferma", methods=["GET", "POST"])
 def conferma():
@@ -866,6 +944,7 @@ def prezzi_view():
         prezzi.setdefault("costo_giornata", 150.0)
         prezzi.setdefault("costo_km", 0.5)
         prezzi.setdefault("prezzo_minimo_infisso", 180.0)
+        prezzi.setdefault("pellicolato_bicolore_percentuale", 10)
 
         with open(prezzi_file, "w") as f:
             json.dump(prezzi, f, indent=4)

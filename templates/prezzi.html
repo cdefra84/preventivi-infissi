@@ -110,6 +110,9 @@
       <label>% maggiorazione pellicolato</label>
       <input type="number" step="0.01" name="pellicolato_percentuale" value="{{ prezzi.pellicolato_percentuale }}">
 
+		<label for="pellicolato_bicolore_percentuale">Maggiorazione pellicolato bicolore (%)</label>
+		<input type="number" name="pellicolato_bicolore_percentuale" step="1" value="{{ prezzi.get('pellicolato_bicolore_percentuale', 10) }}">
+
       <label>% maggiorazione spessore max</label>
       <input type="number" step="0.01" name="maggiorazione_spessore_massima" value="{{ prezzi.maggiorazione_spessore_massima }}">
 

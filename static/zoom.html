@@ -10,8 +10,10 @@
       background: #fff;
       display: flex;
       justify-content: center;
-      align-items: center;
-      height: 100vh;
+      align-items: start;
+      min-height: 100vh;
+      overflow: auto;
+      padding: 20px;
     }
 
     .img-zoom-container {
@@ -25,13 +27,13 @@
       width: 150px;
       height: 150px;
       background-repeat: no-repeat;
-      background-size: 1000px 1000px;
       pointer-events: none;
       box-shadow: 0 0 8px rgba(0,0,0,0.4);
     }
 
     img {
-      max-width: 90vw;
+      width: 100%;
+      max-width: 1200px;
       height: auto;
       display: block;
     }
