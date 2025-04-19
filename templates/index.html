@@ -79,165 +79,45 @@
 <body>
 <div class="form-container">
   <header style="text-align: center; padding: 20px;">
-
-    <!-- Titolo principale -->
     <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">
       INFISSI MOBILIFICIO E FALEGNAMERIA
     </div>
 
-    <!-- Logo centrato e più grande -->
     <div style="margin-bottom: 15px;">
       <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
     </div>
 
-    <!-- Testo showroom e contatti -->
     <div style="font-size: 17px; font-weight: bold; line-height: 1.6;">
       <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO (FG)<br>Cell. 333.4352383</span><br>
       <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span>
     </div>
-
   </header>
 
-        <h2>Compila i dati per calcolare il preventivo</h2>
-        	<form method="POST">
-  		  	<label for="nome">Nome</label>
- 		  	<input type="text" name="nome" required>
+  <h2>Compila i dati per calcolare il preventivo</h2>
+  <form method="POST">
+    <label for="nome">Nome</label>
+    <input type="text" name="nome" required>
 
-  		 	<label for="cognome">Cognome</label>
-  	 	 	<input type="text" name="cognome" required>
+    <label for="cognome">Cognome</label>
+    <input type="text" name="cognome" required>
 
-  			<label for="email">Email</label>
-  			<input type="email" name="email" required>
+    <label for="email">Email</label>
+    <input type="email" name="email" required>
 
-   			<label for="telefono">Telefono</label>
-  		 	<input type="tel" name="telefono" required pattern="[0-9\s\+]+" title="Inserisci un numero valido">
+    <label for="telefono">Telefono</label>
+    <input type="tel" name="telefono" required pattern="[0-9\s\+]+" title="Inserisci un numero valido">
 
-  			 <label for="indirizzo">Indirizzo</label>
-  	 	 	<input type="text" name="indirizzo" required>
-			
-			<label for="citta">Città</label>
-			<input type="text" name="citta" id="citta" required>
+    <label for="indirizzo">Indirizzo</label>
+    <input type="text" name="indirizzo" required>
 
-  	 		<label for="data">Data</label>
-  		 	<input type="text" name="data" value="{{ data_oggi }}" required>
+    <label for="citta">Città</label>
+    <input type="text" name="citta" id="citta" required>
 
-   		 <button type="submit">Prosegui</button>
-		</form>
-    </div>
+    <label for="data">Data</label>
+    <input type="text" name="data" value="{{ data_oggi }}" required>
 
-</body>
-</html>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #fff;
-        }
-
-        header img {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .form-container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            box-sizing: border-box;
-            margin-top: 5px;
-        }
-
-        button {
-            margin-top: 25px;
-            padding: 12px 24px;
-            font-size: 18px;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        button:hover {
-            background-color: #555;
-        }
-
-        @media (max-width: 768px) {
-            input, button {
-                font-size: 16px;
-            }
-
-            .form-container {
-                padding: 0 10px;
-            }
-        }
-    </style>
-</head>
-<body>
-<div class="form-container">
-  <header style="text-align: center; padding: 20px;">
-
-    <!-- Titolo principale -->
-    <div style="font-size: 22px; font-weight: bold; margin-bottom: 10px;">
-      INFISSI MOBILIFICIO E FALEGNAMERIA
-    </div>
-
-    <!-- Logo centrato e più grande -->
-    <div style="margin-bottom: 15px;">
-      <img src="{{ url_for('static', filename='immagini/logo.jpg') }}" alt="Logo Azienda">
-    </div>
-
-    <!-- Testo showroom e contatti -->
-    <div style="font-size: 17px; font-weight: bold; line-height: 1.6;">
-      <span style="font-weight: normal;">SHOWROOM ROCCHETTA SANT'ANTONIO (FG)<br>Cell. 333.4352383</span><br>
-      <span style="font-weight: normal;">SHOWROOM MONTEFALCIONE (AV)<br>Cell. 389.9686594</span>
-    </div>
-
-  </header>
-
-        <h2>Compila i dati per calcolare il preventivo</h2>
-        	<form method="POST">
-  		  	<label for="nome">Nome</label>
- 		  	<input type="text" name="nome" required>
-
-  		 	<label for="cognome">Cognome</label>
-  	 	 	<input type="text" name="cognome" required>
-
-  			<label for="email">Email</label>
-  			<input type="email" name="email" required>
-
-   			<label for="telefono">Telefono</label>
-  		 	<input type="tel" name="telefono" required pattern="[0-9\s\+]+" title="Inserisci un numero valido">
-
-  			 <label for="indirizzo">Indirizzo</label>
-  	 	 	<input type="text" name="indirizzo" required>
-			
-			<label for="citta">Città</label>
-			<input type="text" name="citta" id="citta" required>
-
-  	 		<label for="data">Data</label>
-  		 	<input type="text" name="data" value="{{ data_oggi }}" required>
-
-   		 <button type="submit">Prosegui</button>
-		</form>
-    </div>
-
+    <button type="submit">Prosegui</button>
+  </form>
+</div>
 </body>
 </html>
