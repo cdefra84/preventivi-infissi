@@ -110,8 +110,10 @@
     <label for="indirizzo">Indirizzo</label>
     <input type="text" name="indirizzo" required>
 
-    <label for="citta">Città</label>
-    <input type="text" name="citta" id="citta" required>
+<label for="citta">Città</label>
+<input type="text" name="citta" id="citta" list="suggerimenti_citta" required>
+<datalist id="suggerimenti_citta"></datalist>
+
 
     <label for="data">Data</label>
     <input type="text" name="data" value="{{ data_oggi }}" required>
@@ -119,5 +121,21 @@
     <button type="submit">Prosegui</button>
   </form>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("/static/comuni_zona_climatica.json")
+        .then(response => response.json())
+        .then(data => {
+            const datalist = document.getElementById("suggerimenti_citta");
+            data.forEach(comune => {
+                const option = document.createElement("option");
+                option.value = comune.nome;
+                datalist.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Errore nel caricamento delle città:", error));
+});
+</script>
+
 </body>
 </html>

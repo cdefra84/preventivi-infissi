@@ -540,7 +540,7 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     if requisito_uw:
         conforme = float(uw) <= float(requisito_uw)
         sstato = "[✓] Conforme al requisito di trasmittanza della tua zona climatica" if conforme else "[X] NON conforme al requisito di trasmittanza della tua zona climatica"
-        righe.append(("Verifica trasmittanza", stato))
+        righe.append(("Verifica trasmittanza", sstato))
     
     # Scrittura tabella tecnica
     for caratteristica, valore in righe:
@@ -975,3 +975,8 @@ def modifica_articoli():
         ultimo_n = 1
 
     return redirect(f"/articolo/{ultimo_n}?session={session_id}")
+from flask import send_from_directory
+
+@app.route('/static/comuni_zona_climatica.json')
+def serve_comuni():
+    return send_from_directory('web', 'comuni_zona_climatica.json')

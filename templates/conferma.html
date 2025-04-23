@@ -174,13 +174,16 @@
 
     {% if cliente %}
     <h2>Dati Cliente</h2>
-    <ul>
-        <li><strong>Nome:</strong> {{ cliente.nome }}</li>
-        <li><strong>Cognome:</strong> {{ cliente.cognome }}</li>
-        <li><strong>Email:</strong> {{ cliente.email }}</li>
-        <li><strong>Indirizzo:</strong> {{ cliente.indirizzo }}</li>
-        <li><strong>Data:</strong> {{ cliente.data }}</li>
-    </ul>
+<ul>
+    <li><strong>Nome:</strong> {{ cliente.nome }}</li>
+    <li><strong>Cognome:</strong> {{ cliente.cognome }}</li>
+    <li><strong>Email:</strong> {{ cliente.email }}</li>
+    <li><strong>Telefono:</strong> {{ cliente.telefono }}</li>
+    <li><strong>Indirizzo:</strong> {{ cliente.indirizzo }}</li>
+    <li><strong>Città:</strong> {{ cliente.citta }}</li>
+    <li><strong>Data:</strong> {{ cliente.data }}</li>
+</ul>
+
     {% endif %}
 
     {% if articoli %}
