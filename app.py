@@ -953,23 +953,20 @@ def conferma():
 
 
 
-import os
-from PIL import Image, ImageDraw, ImageFont
-
-import os
-from PIL import Image, ImageDraw, ImageFont
-
+from flask import send_file, abort
+import mimetypes
 
 @app.route("/download/<filename>")
 def download(filename):
-    # Costruisci il path assoluto
     path = os.path.abspath(os.path.join("preventivi", filename))
-    
-    # Verifica che sia effettivamente in quella directory (security fix)
+
+    # Sicurezza: assicurati che sia davvero dentro la cartella preventivi
     if not os.path.exists(path) or not path.startswith(os.path.abspath("preventivi")):
         return f"File {filename} non trovato", 404
 
-    return send_file(path, as_attachment=True, mimetype="application/pdf")
+    # Forza il tipo MIME corretto
+    mimetype = mimetypes.guess_type(filename)[0] or 'application/pdf'
+    return send_file(path, as_attachment=True, download_name=filename, mimetype=mimetype)
 
 
 @app.route("/prezzi", methods=["GET", "POST"])
