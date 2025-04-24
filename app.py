@@ -194,13 +194,13 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     for i, a in enumerate(articoli):
         descrizione = a["descrizione"]
         dettagli = []
-
-        dettagli.append(f"Tipo vetro: {a.get('tipo_vetro', 'doppio')}")
+    # Dati binari/descrittivi
+        
+        dettagli.append(f"Dimensioni: {a['larghezza']} x {a['altezza']} mm")
         dettagli.append(f"Numero ante: {a.get('numero_ante', '2')}")
         dettagli.append(f"Tipo serramento: {a.get('tipo_serramento', 'pvc')}")
         dettagli.append(f"Spessore: {a.get('spessore', 76)} mm")
 
-        # Dati binari/descrittivi
         cassonetti = a.get("cassonetti", "n")
         avvolgibili = a.get("avvolgibili", "n")
         rullo = a.get("rullo", "n")
@@ -208,10 +208,24 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         pellicolato = a.get("pellicolato", "n")
         effetto = a.get("effetto_pellicolato", "Nessuno")
         accessori = a.get("accessori", "")
+        dettagli.append(f"Tipo Telaio: Telaio L")
+        if cassonetti == 's':
+            dettagli.append("Cassonetti: Sì")
+        if avvolgibili == 's':
+            dettagli.append("Avvolgibili: Sì")
+        if rullo == 's':
+            dettagli.append("Rullo puleggia: Sì")
+        tipo_vetro_raw = a.get("tipo_vetro", "doppio")
+        if tipo_vetro_raw == "doppio":
+            tipo_descrizione = "Doppio vetro 33.1/15 Super Spacer"
+        elif tipo_vetro_raw == "triplo":
+            tipo_descrizione = "Triplo vetro 33.1/15 Super Spacer"
+        elif tipo_vetro_raw == "argon":
+            tipo_descrizione = "Triplo vetro 33.1/15 Super Spacer con Gas Argon / 33.1BE 1.0"
+        else:
+            tipo_descrizione = tipo_vetro_raw
 
-        dettagli.append(f"Cassonetti: {'Sì' if cassonetti == 's' else 'No'}")
-        dettagli.append(f"Avvolgibili: {'Sì' if avvolgibili == 's' else 'No'}")
-        dettagli.append(f"Rullo puleggia: {'Sì' if rullo == 's' else 'No'}")
+        dettagli.append(f"Tipo vetro: {tipo_descrizione}")
         dettagli.append(f"Vasistas (Ribaltabile): {'Sì' if vasistas == 's' else 'No'}")
         if pellicolato == 's':
             if "-" in effetto:
@@ -227,9 +241,8 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
             dettagli.append(f"Soglia ribassata: Sì – quantità {a['quantita']}")
         else:
             dettagli.append("Soglia ribassata: No")
-        dettagli.append("Piattina da 30")
+        dettagli.append("Piattina da 30 colore")
         colore_guida = effetto if pellicolato == "s" else "bianco"
-        dettagli.append(f"Guida distanziali in alluminio da 58 colore {colore_guida}")
 
 
         prezzo_mq_base = prezzi.get(f"vetro_{a.get('tipo_vetro', 'doppio')}", prezzi["vetro_doppio"])
@@ -372,14 +385,37 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
     try:
         distanza_km = calcola_distanza_km(cliente["citta"])
         giorni_lavoro = max(1, totale_pezzi // 5)
-        costo_trasferta = round(prezzi["costo_km"] * distanza_km + prezzi["costo_giornata"] * giorni_lavoro, 2)
+
+        # Calcola percentuale trasferta base in base alla distanza
+        if distanza_km <= 50:
+            percentuale_trasferta = 0.0
+        elif distanza_km <= 100:
+            percentuale_trasferta = 0.10
+        elif distanza_km <= 150:
+            percentuale_trasferta = 0.20
+        elif distanza_km <= 200:
+            percentuale_trasferta = 0.30
+        elif distanza_km <= 250:
+            percentuale_trasferta = 0.50
+        elif distanza_km <= 300:
+            percentuale_trasferta = 0.70
+        elif distanza_km <= 350:
+            percentuale_trasferta = 0.90
+        else:
+            percentuale_trasferta = 1.00
+
+        base = prezzi.get("trasferta_base", 550)
+        extra = prezzi["costo_giornata"] * giorni_lavoro
+
+        costo_trasferta = round(base * percentuale_trasferta + extra, 2)
 
         pdf.set_font("Arial", "", 8)
         pdf.cell(0, 5, pulisci_testo_pdf(
             f"Trasferta (distanza stimata {distanza_km:.0f} km – {giorni_lavoro} gg lavoro): {costo_trasferta:.2f} EUR"),
             ln=True, align="R")
 
-        imponibile += costo_trasferta  # Aggiunge la trasferta
+        imponibile += costo_trasferta
+
     except Exception:
         pdf.set_font("Arial", "", 8)
         pdf.cell(0, 5, pulisci_testo_pdf(
@@ -557,14 +593,15 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         if spazio_disponibile >= altezza_immagine:
             pdf.image(img_pellicole, x=20, y=pdf.get_y() + 10, w=180)
 
-    # Salvataggio PDF
-    pdf.output(filepath)
-    
     os.makedirs("preventivi", exist_ok=True)
     filepath = os.path.join("preventivi", f"preventivo_{numero_preventivo}.pdf")
     pdf.output(filepath)
 
-    invia_email(cliente["email"], filepath, numero_preventivo)
+    if os.path.exists(filepath):
+        print(f"[📧 Invio] Invio email a {cliente['email']} con allegato {filepath}")
+        invia_email(cliente["email"], filepath, numero_preventivo)
+    else:
+        print(f"[❌] PDF non generato correttamente per {cliente['email']}")
 
     return {
         "uw": uw,
@@ -853,7 +890,6 @@ def articolo(n):
 def conferma():
     session_id = request.args.get("session")
 
-    # 🔒 Verifica che il session_id sia valido
     if not session_id:
         return "<h1>Sessione non valida</h1><p>Torna alla <a href='/'>home</a> per ricominciare il preventivo.</p>", 400
 
@@ -865,6 +901,20 @@ def conferma():
     except FileNotFoundError:
         return "<h1>Sessione scaduta o non trovata</h1><p>I dati non sono disponibili. Torna alla <a href='/'>home</a> per iniziare un nuovo preventivo.</p>", 404
 
+    # Calcola sconto
+    prezzi = carica_prezzi()
+    imponibile = 0
+    for a in articoli:
+        prezzo_unitario, _ = calcola_prezzo_mq(
+            a["larghezza"],
+            a["altezza"],
+            prezzi.get(f"vetro_{a.get('tipo_vetro', 'doppio')}", prezzi["vetro_doppio"])
+        )
+        imponibile += prezzo_unitario * a["quantita"]
+    totale_pezzi = sum(a["quantita"] for a in articoli)
+    sconto_percentuale, sconto_valore = calcola_sconto_migliore(imponibile, totale_pezzi, prezzi)
+    sconto_valore = round(sconto_valore, 2)
+
     if request.method == "POST":
         numero_preventivo = genera_numero_preventivo()
         filename = f"Preventivo_{numero_preventivo}.pdf"
@@ -872,10 +922,8 @@ def conferma():
         os.makedirs("preventivi", exist_ok=True)
 
         try:
-            # 🔁 genera_pdf ora restituisce info_tecniche
             info_tecniche = genera_pdf(cliente, articoli, filepath, numero_preventivo)
 
-            # ✅ Elimina i file temporanei della sessione
             os.remove(f"sessione/cliente_{session_id}.json")
             os.remove(f"sessione/articoli_{session_id}.json")
 
@@ -884,23 +932,14 @@ def conferma():
                 success=True,
                 file=filename,
                 session_id=session_id,
-                info_tecniche=info_tecniche  # ✅ Passa i dati tecnici al template
+                info_tecniche=info_tecniche,
+                sconto_valore=sconto_valore,
+                sconto_percentuale=sconto_percentuale
             )
         except Exception as e:
             return f"<h1>Errore nella generazione del PDF</h1><p>{e}</p>", 500
 
-    # Calcola sconto da mostrare in conferma
-    prezzi = carica_prezzi()
-    imponibile = sum([
-        calcola_prezzo_mq(a["larghezza"], a["altezza"], prezzi.get(f"vetro_{a.get('tipo_vetro', 'doppio')}", prezzi["vetro_doppio"]))[0]
-        * a["quantita"]
-        for a in articoli
-    ])
-    totale_pezzi = sum(a["quantita"] for a in articoli)
-    sconto_percentuale, sconto_valore = calcola_sconto_migliore(imponibile, totale_pezzi, prezzi)
-    sconto_valore = round(sconto_valore, 2)
-
-    # RENDER CON SCONTO (niente info_tecniche in GET)
+    # GET: Riepilogo prima della conferma
     return render_template(
         "conferma.html",
         cliente=cliente,
@@ -910,6 +949,8 @@ def conferma():
         sconto_valore=sconto_valore,
         sconto_percentuale=sconto_percentuale
     )
+
+
 
 
 import os
