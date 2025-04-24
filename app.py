@@ -962,10 +962,15 @@ from PIL import Image, ImageDraw, ImageFont
 
 @app.route("/download/<filename>")
 def download(filename):
-    path = os.path.join("preventivi", filename)
-    if os.path.exists(path):
-        return send_file(path, as_attachment=True)
-    return f"File {filename} non trovato", 404
+    # Costruisci il path assoluto
+    path = os.path.abspath(os.path.join("preventivi", filename))
+    
+    # Verifica che sia effettivamente in quella directory (security fix)
+    if not os.path.exists(path) or not path.startswith(os.path.abspath("preventivi")):
+        return f"File {filename} non trovato", 404
+
+    return send_file(path, as_attachment=True, mimetype="application/pdf")
+
 
 @app.route("/prezzi", methods=["GET", "POST"])
 def prezzi_view():
