@@ -241,7 +241,7 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
             dettagli.append(f"Soglia ribassata: Sì – quantità {a['quantita']}")
         else:
             dettagli.append("Soglia ribassata: No")
-        dettagli.append("Piattina da 30 colore")
+        dettagli.append("Piattina da 30")
         colore_guida = effetto if pellicolato == "s" else "bianco"
 
 
@@ -593,30 +593,23 @@ def genera_pdf(cliente, articoli, filepath, numero_preventivo):
         if spazio_disponibile >= altezza_immagine:
             pdf.image(img_pellicole, x=20, y=pdf.get_y() + 10, w=180)
 
-    os.makedirs("preventivi", exist_ok=True)
-    filepath = os.path.join("preventivi", f"preventivo_{numero_preventivo}.pdf")
+    # 🛠 Usa direttamente il filepath passato (non crearne uno nuovo!)
     pdf.output(filepath)
 
+    # 📧 Invia l'email
     if os.path.exists(filepath):
         print(f"[📧 Invio] Invio email a {cliente['email']} con allegato {filepath}")
         invia_email(cliente["email"], filepath, numero_preventivo)
     else:
         print(f"[❌] PDF non generato correttamente per {cliente['email']}")
 
-    return {
-        "uw": uw,
-        "zona_climatica": zona_climatica,
-        "requisito_uw": requisito_uw,
-        "conforme": conforme
-    }
-    # Elimina le immagini generate nella cartella temporanea
+    # 🧹 Elimina immagini temporanee
     import glob
     for img_path in glob.glob(f"static/immagini_generati/infisso_{cliente['email'].split('@')[0]}_*.png"):
         try:
             os.remove(img_path)
         except Exception as e:
             print(f"Errore nella rimozione di {img_path}: {e}")
-
 
 import smtplib, ssl
 from email.message import EmailMessage
@@ -735,8 +728,12 @@ import uuid
 @app.route("/", methods=["GET", "POST"])
 def index():
     oggi = datetime.now().strftime("%d/%m/%Y")
+
     if request.method == "POST":
+        # Se non esiste ancora session_id, lo genero
         session_id = str(uuid.uuid4())
+
+        # 🔵 Salva dati cliente su file legato alla sessione
         cliente = {
             "nome": request.form["nome"],
             "cognome": request.form["cognome"],
@@ -746,10 +743,14 @@ def index():
             "citta": request.form["citta"].strip().title(),
             "data": request.form["data"]
         }
+
         os.makedirs("sessione", exist_ok=True)
         with open(f"sessione/cliente_{session_id}.json", "w") as f:
             json.dump(cliente, f)
+
+        # 🔵 Passa session_id nei redirect
         return redirect(f"/articolo/1?session={session_id}")
+
     return render_template("index.html", data_oggi=oggi)
 
 
@@ -949,8 +950,6 @@ def conferma():
         sconto_valore=sconto_valore,
         sconto_percentuale=sconto_percentuale
     )
-
-
 
 
 from flask import send_file, abort
